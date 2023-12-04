@@ -16,7 +16,7 @@ timezone: Asia/Seoul
 
 title: Wonjun Choi # the main title
 
-tagline: Researcher # it will display as the sub-title
+tagline: 내가 보려고 만든 블로그 # it will display as the sub-title
 
 description: >- # used by seo meta and the atom feed
   Study Footprint
@@ -62,7 +62,7 @@ google_analytics:
 #     light  - Use the light color scheme
 #     dark   - Use the dark color scheme
 #
-theme_mode: [light|dark]
+theme_mode: #[light|dark]
 
 # The CDN endpoint for images.
 # Notice that once it is assigned, the CDN url
