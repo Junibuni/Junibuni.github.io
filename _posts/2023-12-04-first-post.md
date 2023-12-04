@@ -1,6 +1,5 @@
 ---
 title: 첫 포스트
-author: wjchoi
 date: 2023-12-04 23:11:00 +0800
 categories: [Blogging, Tutorial]
 tags: [github]

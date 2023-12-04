@@ -196,3 +196,6 @@ jekyll-archives:
 
 include:
   - _javascript
+
+future: true
+published: true 
