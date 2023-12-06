@@ -2,7 +2,91 @@
 title: 첫 포스트
 date: 2023-12-04 23:11:00 +0800
 categories: [Blogging, Tutorial]
-tags: [github]
+tags: [github, blog]
 ---
-# 첫 포스트
-여러 블로그를 찾아보며 드디어 github 블로그 설정을 완료했다...
+# Github Blog!
+---
+여러 블로그를 찾아보며 드디어 github 블로그 설정을 완료했다. 
+웹사이트의 기본도 모르는 상태에서 공부 일지를 기록하고 싶어 무작정 따라했다. 깃허브 블로그를 생성하는 과정과 생겼던 오류에 대해서 기록하고자 한다. 해당 과정은 맥 기준으로 진행했다.
+
+## Homebrew 설치하기
+macOS 전용 만능(?) 툴이다. 이미 설치가 되어있기 떄문에 스킵.
+
+## Ruby 설치하기
+Ruby가 뭔가 하고 찾아보니 python 과 유사한 하이레벨 스크립트 언어라고 한다. 자주 쓸지는 모르겠지만 편하게 버전을 관리하기 위해 `pyenv`와 비슷한 `rbenv`와 ruby 를 설치하기 위해 `ruby-build`를 설치해주자.
+
+```console
+$ brew install rbenv ruby-build
+```
+
+설치가 완료 되었다면 설치 가능한 ruby 버전을 확인한다. `pyenv`와 기능이 비슷해서 사용해본 사람들은 익숙하게 느껴질 것 같다.
+
+```console
+$ rbenv install -l
+```
+
+버전이 많았지만 나는 사람들이 쓰는 `Ruby 3.1.3` 버전을 설치하였다
+
+```console
+$ rbenv install 3.1.3
+$ rbenv versions
+```
+
+설치된 버전을 글로벌 버전으로 변경한다
+
+```console
+$ rbenv global 3.1.3
+$ rbenv hash
+```
+
+## Bundler 설치하기
+Bundler가 또 뭐냐... 찾아보니 여러개로 모듈화 된 JS 파일을 말 그대로 'bundle', 즉 합쳐주는 도구라고 한다. 브라우저는 모듈화된 개별 JS 파일을 읽지 못하기 떄문에 부라우저에서 코드를 실행하려면 반드시 필요하다고 한다. 한번 설치를 해보자.
+
+```console
+$ gem install bundler
+ERROR:  While executing gem ... (Gem::FilePermissionError)
+    You don't have write permissions for the ...
+```
+
+마주하고 싶지 않았던 오류가 나를 반긴다. 피할수 없으면 맞서 싸워야 한다. 당황하지 않고 에러 메세지를 읽어보면 Ruby권한이 없다는거 같다. `rbenv`의 PATH를 시스템에 추가해보자.
+
+```console
+$ vim ~/.zshrc
+```
+
+`~/.zshrc`파일을 열어 아래 두줄을 추가하여 PATH를 설정해주자.
+
+```console
+export PATH={$Home}/.rbenv/bin:$PATH && \
+eval "$(rbenv init -)"
+```
+
+변경사항을 `source ~/.zshrc` 명령어를 통해 적용시켜주고 다시 설치를 해보자.
+
+```console
+$ gem install bundler
+...
+gem installed
+```
+
+설치 성공!
+
+## Jekyll 설치하기
+사이트의 구조는 잘 모르지만, 서버와 소통하며 페이지를 만드는 것을 동적 사이트, 반대로 이미 가지고 있는 파일들로 사이트를 만드는 것을 정적 사이트 라고 하는것 같다. 깃허브 블로그는 이미 만들어진 마크다운 파일들로 페이지를 생성하고, 깃허브에 업로드 하여 정적 사이트를 만드는 것 이라고 한다. 나 같은 사람도 정적 웹사이트를 쉽게 만들어주는 사이트 생성기인 `jekyll`을 빠르게 설치해주자.
+
+여담으로, 지킬 앤 하이드에서 '지킬'이라고 한다.
+
+```console
+$ gem install jekyll
+```
+
+이제 필요한 모든 것이 설치된거 같으니 설치가 잘 되었는지 버전을 확인해보자.
+```console
+$ jekyll -v
+jekyll 4.3.2
+
+$ bundler -v
+Bundler version 2.4.22
+```
+
+설치 완료!
