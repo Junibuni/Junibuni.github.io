@@ -156,6 +156,7 @@ defaults:
       share: true
       related: true
       #mathjax: true
+      use_math: true
       sidebar_main: true
   - scope:
       path: _drafts
