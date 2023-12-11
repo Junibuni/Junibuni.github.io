@@ -54,11 +54,13 @@ MathJax.Hub.Register.MessageHook("TeX Jax - parse error",function (message) {
 
 `_layouts/default.html` 파일의 `<head>` 부분에 다음과 같은 코드를 삽입해 준다.
 
+{% raw %}
 ```html
 {% if page.use_math %}
-	{% include mathjax_support.html %}
+  {% include mathjax_support.html %}
 {% endif %}
 ```
+{% endraw %}
 
 ### 4. 포스트 작성
 이제 설정이 끝났으니, 포스트 작성 시 front-matter 에 `use_math: true` 작성 후 사용하면 된다!
@@ -113,9 +115,9 @@ $$
       messageStyle: "none",
       "HTML-CSS": { preferredFont: "TeX", availableFonts: ["STIX","TeX"] }
     });
-    </script>
-  <script type="text/javascript" id="MathJax-script" async src="//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-  </script>
+</script>
+<script type="text/javascript" id="MathJax-script" async src="//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
 ```
 
 이렇게 되면 이제 자유롭게 수학 표현식을 사용할 수 있다!
