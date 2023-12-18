@@ -101,9 +101,9 @@ $ 0x7ffeaa6849b4
 또한 Reference는 절대 `null`이 될 수 없기 때문에, 함수의 인자로 `null`값을 보장 하려면 call by reference method를 사용하면 된다. OOP의 개념으로 보면 Call by Refernce 방법이 조금 더 통용적이고, 깔끔한 코드를 위해 쓰인다고 한다.
 
 ## Python은 Call by Reference? Call by Value?
-결론부터 말하면 둘다 아니다. Python에서 모든 변수는 객체로 관리되기 때문이다. 이 덕분에 garbage collection이나, pythoninc한 코딩이 가능하다. 
+결론부터 말하면 둘다 아니다. Python에서 모든 변수는 객체(Object)로 관리되기 때문이다. 이 덕분에 garbage collection이나, pythoninc한 코딩이 가능하다. 
 
-결론부터 말하면 Python에서 Mutable한 객체이면 Call by Reference, Immutable한 객체이면 Call by Value가 사용된다. 파이썬 공식 문서에서는 이를 `Call by Assignment`라고 한다.
+Python에서 Mutable한 객체이면 Call by Reference, Immutable한 객체이면 Call by Value가 사용된다. 파이썬 공식 문서에서는 이를 `Call by Assignment`라고 한다.
 
 ### Mutable vs Immutable
 <img src="{{page.img_pth}}python_mut_immutable.png">
@@ -111,4 +111,4 @@ _https://medium.com/@meghamohan/mutable-and-immutable-side-of-python-c2145cf7274
 
 위 그림에서 볼 수 있는 것처럼 `list`, `set`, `dict`와 같이 가변적인 객체 자료형을 `Immutable`객체, 반대로 `tuple`, `int`와 같이 불가변적인 객체 자료형을 `Mutable`객체라고 한다.
 
-Python에서 객체가 어떤식으로 작동하는지는 [여기](Junibuni.github.io/posts/python_how_object_works)
+Python에서 객체가 어떤식으로 작동하는지는 [여기](../python-how-object-works)를 참고!
