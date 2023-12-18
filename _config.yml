@@ -158,6 +158,7 @@ defaults:
       #mathjax: true
       use_math: true
       sidebar_main: true
+      img_pth : /assets/img/post/
   - scope:
       path: _drafts
     values:
