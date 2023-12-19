@@ -6,3 +6,4 @@ tags: [python, variables, objects, object-oriented programming, memory managemen
 use_math: true
 ---
 # in progress
+https://nedbatchelder.com/text/names.html

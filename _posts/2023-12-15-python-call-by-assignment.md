@@ -109,6 +109,6 @@ Python에서 Mutable한 객체이면 Call by Reference, Immutable한 객체이�
 <img src="{{page.img_pth}}python_mut_immutable.png">
 _https://medium.com/@meghamohan/mutable-and-immutable-side-of-python-c2145cf72747_
 
-위 그림에서 볼 수 있는 것처럼 `list`, `set`, `dict`와 같이 가변적인 객체 자료형을 `Immutable`객체, 반대로 `tuple`, `int`와 같이 불가변적인 객체 자료형을 `Mutable`객체라고 한다.
+위 그림에서 볼 수 있는 것처럼 `list`, `set`, `dict`와 같이 가변적인 객체 자료형을 `Mutable`객체, 반대로 `tuple`, `int`와 같이 불가변적인 객체 자료형을 `Immutable`객체라고 한다.
 
 Python에서 객체가 어떤식으로 작동하는지는 [여기](../python-how-object-works)를 참고!
