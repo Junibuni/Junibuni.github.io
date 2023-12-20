@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:xlink="http://www.w3.org/1999/xlink" baseProfile="full" height="79.0" version="1.1" width="116.0">
+  <title>x and y aren’t magically linked</title>
+  <defs>
+    <marker class="arrowend" id="id3" markerHeight="10" markerWidth="10" orient="auto" refX="10" refY="5" viewBox="0,0,10,10">
+      <path d="M 0,0 L 10,5 L 0,10 L 1,5 z" fill="#FFFFFF"></path>
+    </marker>
+  </defs>
+  <g transform="translate(-81.0,-13.0)">
+    <polygon class="name" points="83,15 115,15 120,30 115,45 83,45" fill="#333333" stroke="#FFFFFF"></polygon>
+    <text dy=".3em" text-anchor="middle" x="99.625" y="30" fill="#FFFFFF">x</text>
+    <polygon class="name" points="83,60 115,60 120,75 115,90 83,90" fill="#333333" stroke="#FFFFFF"></polygon>
+    <text dy=".3em" text-anchor="middle" x="99.625" y="75" fill="#FFFFFF">y</text>
+    <circle class="int value" cx="180" cy="30" r="15" fill="#000000" stroke="#FFFFFF"></circle>
+    <text dy=".3em" text-anchor="middle" x="180" y="30" fill="#FFFFFF">12</text>
+    <circle class="int value" cx="180" cy="75" r="15" fill="#000000" stroke="#FFFFFF"></circle>
+    <text dy=".3em" text-anchor="middle" x="180" y="75" fill="#FFFFFF">23</text>
+    <path class="arrow" d="M 120,30 C 131,30 131,30 142,30 C 153,30 153,30 165,30" fill="none" stroke="#FFFFFF" marker-end="url(#id3)"></path>
+    <path class="arrow" d="M 120,75 C 131,75 131,75 142,75 C 153,75 153,75 165,75" fill="none" stroke="#FFFFFF" marker-end="url(#id3)"></path>
+  </g>
+</svg>
