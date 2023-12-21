@@ -8,7 +8,7 @@ use_math: true
 # Python
 다른 언어들은 변수를 선언할 때 타입을 함께 명시해 준다. 하지만 파이썬은 변수 타입과 메모리 할당을 따로 해주지 않아도 된다는 점에서 코딩 입문자가 접하기 쉬운 언어인 것 같다. 하지만 파이썬은 다른 언어와 어떻게 차이가 있길래 변수 선언 방식이 다른걸까?
 
-해당 주제는 Ned Batchelder의 (PyCon 2015 발표)[https://youtube.com/watch?v=_AEJHKGk9ns]를 참고하여 작성했다. Ned의 설명이 너무 깔끔해서 내용을 정리하고자 작성한다.
+해당 주제는 Ned Batchelder의 [PyCon 2015 발표](https://youtube.com/watch?v=_AEJHKGk9ns)를 참고하여 작성했다. Ned의 설명이 너무 깔끔해서 내용을 정리하고자 작성한다.
 
 ## Names and Values
 Python에서는 `name is a reference to a value`라고 한다. 이게 무슨 뜻이냐 하면,
@@ -19,7 +19,7 @@ x = 23
 의 경우 변수 `x`가 `23`을 refer 한다고 한다. 나중에 이 x의 값을 아용하게 되면,
 
 ```python
-print(x+2) #25
+print(x + 2)      #25
 ```
 
 가 된다. 이를 쉽게 이해하기 위해서 아래와 같이 `이름`을 회색 태그로 나타내고, `화살표`로 값을 가리키는 그림을 그려볼 수 있다.
@@ -48,7 +48,7 @@ x = 12
 Python에서의 값은 자신을 가리키고 있는 화살표, 즉 이름이 없을 때 메모리 해제를 시켜준다. 이를 garbage collection이라고 한다. Reference counting의 수가 0이 될 때, 더이상 쓰이지 않는 값이라고 판단하여 값을 메모리에서 지워주게 되는데, 나중에 자세하게 gc에 대해 다뤄보도록 하겠다.
 
 ## Assignment
-Python에서 값을 이름에 assign 해줄 때, 값을 절대로 복사해주지 않고, 새로운 값을 절대 만들어 내지 않는다. 방금 전 예시를 보면 x와 y, 두 변수가 생성된 것처럼 보이지만, `y = x`를 해주었을 때 값은 하나고, 이름표가 두개 만들어 진 것이다. 일반 정수형 말고 리스트와 같이 복잡한 데이터를 보자.
+Python에서 값을 이름에 assign 해줄 때, 값은 복사되지 않고, 새로운 값은 절대로 만들어 지지 않는다. 방금 전 예시를 보면 x와 y, 두 변수가 생성된 것처럼 보이지만, `y = x`를 해주었을 때 값은 하나고, 이름표가 두개 만들어 진 것이다. 일반 정수형 말고 리스트와 같이 복잡한 데이터를 보자.
 
 ```python
 nums = [1, 2, 3]
@@ -61,7 +61,7 @@ tri = nums
 ```
 <img src="{{page.img_pth}}pyob5.svg">
 
-전의 예시와 같이 하나의 list데이터가 있고, 두개의 이름표 (nums, tri)가 해당 리스트를 가리키고 있다. Python의 값은 dict, set, user-defined objects와 같이 가변적인 `mutable`값과, 불가변적인 int, strings, tuples값은 `immutable`값이라고 한다.
+전의 예시와 같이 하나의 list데이터가 있고, 두개의 이름표 (nums, tri)가 해당 리스트를 가리키고 있다. Python에는 dict, set, user-defined objects와 같이 가변적인 `mutable`값과, 불가변적인 int, strings, tuples과 같은 `immutable`값이 있다.
 
 Mutable 객체는 값 자체를 in-place로 조작할 수 있는 method가 있다는 것이 특징이고, immutable 객체는 값이 절대로 변하지 않는다는 특징이 있다. 하나 예시를 들어보자.
 
@@ -157,6 +157,65 @@ print(f"num: {num}\nnums: {nums}")
 mutableFunction이 조금 헷갈릴 수 있으니 그림으로 이해해 보자.
 
 <img src="{{page.img_pth}}pyob9.svg">
+
+local variables 는 점선 프레임 안의 reference로 표현되었다. Assignment 는 절대로 값을 복사하거나 생성하지 않기 때문에, 로컬 변수의 `li`는 `nums`와 같은 값을 가리키고 있게 된다. `li.append`메소드를 사용하게 되면 가리키고 있는 list 값을 mutate하게 된다.
+
+<img src="{{page.img_pth}}pyob10.svg">
+
+함수가 끝나면 local name들은 모두 없어지고, 값들은 reference 가 없기 때문에 사라지게 된다. 하지만, `nums`가 가리키고 있는 데이터는 reference 가 남아있기 때문에 사라지지 않는다. 따라서 다음과 같은 결과를 얻을 수 있다.
+
+<img src="{{page.img_pth}}pyob11.svg">
+
+위와 같은 경우 잘 작동하지만, 이 함수를 아래와 같이 작성하게 되면 원하는 결과값이 나오지 않는다.
+
+```python
+def mutableFunction(li, val):
+    li = li + [val]
+
+nums = [1, 2, 3]
+
+mutableFunction(nums, 100)
+print(nums)         # [1, 2, 3]
+```
+<img src="{{page.img_pth}}pyob9.svg">
+
+이 전의 예시와 동일하게 할당이 된다. 하지만 그 다음 단계에서 조금 차이가 있다.
+
+<img src="{{page.img_pth}}pyob12.svg">
+
+`li = li + [val]`수식은 새로운 list를 만들게 되고, `li` 변수에 해당 값을 위와 같이 재할당 해주게 된다. 함수가 끝나면 로컬 변수인 `li`와 `val`변수의 reference(이름표)가 사라지고, `nums`변수만 아래와 같이 남게 된다.
+
+<img src="{{page.img_pth}}pyob13.svg">
+
+해당 변수가 함수 밖에서도 필요하다면, 아래와 같이 작성하면 된다.
+
+```python
+def mutableFunction(li, val):
+    li = li + [val]
+    return li
+
+nums = [1, 2, 3]
+
+nums = mutableFunction(nums, 100)
+print(nums)     #[1, 2, 3, 100]
+```
+
+위와 같이 새로운 값을 만들고, 그 값을 리턴하는 함수이다. 이 방법이 제일 많이 쓰이는 방법이다. 그 이유는 값을 in-place로 조작하지 않고 새로운 값을 만들기 때문에 "Presto-Chango"를 방지 할 수 있다.
+
+사실 사용법에 있어 정답은 없다. Python의 작동방식을 이해하고, 상황에 알맞은 기능을 쓰는것이 바람직하다고 생각한다.
+
+## Dynamic Typing
+Python은 dynamic typing을 지원하며, 이 뜻은 이름에는 타입이 없다는 뜻이다. 이름은 모든 타입을 지원하며, 하나의 이름은 int, str, func, module 모두 refer가 가능하다. 당연히 하나의 변수가 코드 내에서 여러가지 타입을 사용한다면 코드의 가독성이 떨어지거나 오류가 날 가능성이 높아지지만, 파이썬은 이런 작업이 가능하다.
+
+Python에서의 `name`은 type이 없고, `value`는 scope가 없다는 것이 중요하다. 함수 안의 변수는 local variable 이라고 하고, 여기서 우리는 해당 변수가 함수에 scoped 되었다고 한다. 이 변수는 함수 밖에서는 사용이 되지 않고, 함수 밖으로 나오면 해당 변수는 삭제되는 것이다. 하지만 파이썬에서는 함수 내의 name이 가리키는 변수가 다른 name에 의해서 참조 되고 있다면, 변수는 삭제되지 않을 것이다. Local 변수 자체가 삭제 되는 것이 아닌, local name이 삭제 되는 것이다.
+
+```python
+nums = [1, 2, 3]
+del nums
+```
+여태까지 변수를 삭제하는 개념으로 `del` 명령어를 사용하고 있었지만, `del`은 사실 name을 삭제하는 것이였다! 만약 `del`을 사용하여 값의 reference count가 0이 되는 경우, 변수가 gc에 의해 삭제 될 것이다.
+
+이와 비슷한 경우로,
 
 1. Assignment never copies data.
 2. Python is neither "Call By value" nor "Call By Reference", it's "Call by Assignment"! Epic! 
