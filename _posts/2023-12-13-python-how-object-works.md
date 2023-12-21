@@ -215,8 +215,104 @@ del nums
 ```
 여태까지 변수를 삭제하는 개념으로 `del` 명령어를 사용하고 있었지만, `del`은 사실 name을 삭제하는 것이였다! 만약 `del`을 사용하여 값의 reference count가 0이 되는 경우, 변수가 gc에 의해 삭제 될 것이다.
 
-이와 비슷한 경우로,
+## More Examples
+---
+### 덧셈 연산자(+)와 증감 연산자(+=)
+```python
+nums1 = [1, 2, 3]
+nums1 = nums1 + [4]
+
+nums2 = [1, 2, 3]
+nums2 += [4]
+```
+
+언뜻 보면 두 수식은 같은 역할은 하는 것 처럼 보인다. 하지만 `+`은 `__add__` 메소드를,  `+=`는 `__iadd__`메소드를 호출한다.
+
+`__add__`메소드
+- 대칭 연산 (순서가 상관 없음)
+- mutate the list
+
+`__iadd__`메소드
+- 비대칭 연산 (순서에 따라 연산 결과가 다름)
+- returns new list
+
+간단하게 보면 mutation VS. rebinding의 개념이다.
+
+### python "is" and "=="
+결론부터 말하자면 python의 `is`는 reference가 같은지 검사하고, `==`는 value가 같은지 검사한다.
+
+```python
+list1 = [1, 2, 3]
+list2 = [1, 2, 3]
+
+# 주소가 다름
+print(f"{hex(id(list1))}, {hex(id(list2))}") # 0x7f21b76cd600, 0x7f21b76d1580
+
+print(f"== : {list1 == list2}")     # True
+print(f"is : {list1 is list2}")     # False
+```
+
+위와 같이 같은 값을 가지고 있더라도 할당되는 주소값이 달라 `==`연산은 `True`를 반환하지만, `is`연산은 `False`를 반환한다. 추가적으로 아래 예시를 보자.
+
+```python
+a = 2 + 2
+b = 4
+print(f"{a == b}")      # True
+print(f"{a is b}")      # True
+
+c = 1000 + 1
+d = 1001
+print(f"{c == d}")      # True
+print(f"{c is d}")      # False
+```
+
+두 연산 모두 똑같은 정수형 변수를 비교하는 연산이지만, 결과가 다르다. 이게 어떻게 된 일인가? "2 + 2 is 4"이고, "1000 + 1 is not 1001"은 직관적이지 않은 연산처럼 보인다. 하지만 이는 Python이 작은 정수에 대해서 메모리 최적화를 시키는 방식에 있다.
+
+Python에서는 효율성의 이유로 작은 정수(보통 -5 ~ 256)는 캐시되고 재사용이 된다. `2 + 2`연산을 수행하면 Python은 캐시에서 정수 `4`를 나타내는 동일한 객체를 사용하게 된다. 첫번째 경우에서 `a`와 `b`가 메모리에서 동일한 값을 참조하고 `is`연산에서 `True`를 반환하게 되는 것이다.
+
+하지만 `1000 + 1`과 같이 범위를 넘어서는 정수의 경우, 같은 방식으로 캐시하지 않는다. 이 경우 값은 같지만 두개의 서로 다른 정수 객체가 메모리에 생성되어 식의 각 면에 있는 덧셈의 결과를 나타낸다. 따라서 두개의 면이 메모리의 서로 다른 값을 참조하기 때문에 ID 검사에서 `False`를 반환하게 되는 것이다.
+
+```python
+print(hex(id(a)))      # '0x102baa990'
+print(hex(id(b)))      # '0x102baa990'
+
+print(hex(id(c)))      # '0x102d8c570'
+print(hex(id(d)))      # '0x102d8c590'
+```
+
+### List 조작
+List 객체를 생성하고 초기화 할 때 다음과 같이 진행 할 수 있다.
+
+```python
+# case 1
+list1 = [[0]] * 8
+# >>> [[0], [0], [0], [0], [0], [0], [0], [0]]
+
+# case 2
+list2 = [[0] for _ in range(8)]
+# >>> [[0], [0], [0], [0], [0], [0], [0], [0]]
+```
+
+두 방법 모두 같은 결과를 가져온다. 그럼 무슨 차이가 있을까?
+
+첫번째 경우는 모든 원소들이 같은 값을 참조하게 된다. 전에 말했듯이 Python에서의 list는 referntial structure이기 때문이다. 그림으로 표현하면 다음과 같다.
+
+<img src="{{page.img_pth}}Dvei1.png">
+
+이 경우, 다음과 같은 현상이 나타난다.
+
+```python
+list1[1].append[3]
+# >>> [[0, 3], [0, 3], [0, 3], [0, 3], [0, 3], [0, 3], [0, 3], [0, 3]]
+```
+
+첫번째 원소의 값만 mutate 해주었지만, 모든 원소가 같은 값을 가리키고 있기 때문에 모든 원소의 값이 변하게 된다. 따라서, 의도한 것이 아니라면 case 2와 같은 방법으로 생성해 주어야 한다.
+
+
+정리하자면 Python의 특징은 다음과 같다.
 
 1. Assignment never copies data.
-2. Python is neither "Call By value" nor "Call By Reference", it's "Call by Assignment"! Epic! 
-3. There is no way in python where a name can refer to another name. A name can only refer to values. Oh my!
+2. Python is neither "Call By value" nor "Call By Reference", it's "Call by Assignment" 
+3. There is no way in python where a name can refer to another name. A name can only refer to values.
+
+Python은 간편하면서도 신기한 언어인 것 같다.

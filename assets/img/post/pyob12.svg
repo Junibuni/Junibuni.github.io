@@ -6,7 +6,7 @@
     </marker>
   </defs>
   <g transform="translate(27.0,-4.0)">
-    <polygon class="name" points="57,37.5 115,37.5 120,52.5 115,67.5 57,67.5" fill="#000000" stroke="#FFFFFF"></polygon>
+    <polygon class="name" points="57,37.5 115,37.5 120,52.5 115,67.5 57,67.5" fill="#333333" stroke="#FFFFFF"></polygon>
     <text dy=".3em" text-anchor="middle" x="86.625" y="52.5" fill="#FFFFFF">nums</text>
     <rect class="list" height="30" width="24" x="165" y="37.5" fill="#000000" stroke="#FFFFFF"></rect>
     <text dy=".3em" text-anchor="middle" x="177" y="52.5" fill="#FFFFFF">1</text>
@@ -17,7 +17,7 @@
     <path class="arrow" d="M 120,52 C 131,52 131,52 142,52 C 153,52 153,52 165,52" fill="none" stroke="#FFFFFF" marker-end="url(#id17)"></path>
     <rect class="frame" height="120" rx="12" ry="12" width="160" x="-25" y="82.5" fill="none" stroke="#FFFFFF" stroke-dasharray="3,3"></rect>
     <text class="framelabel" dy=".3em" opacity="1" text-anchor="middle" x="55" y="97.5" fill="#FFFFFF">mutationFunction</text>
-    <polygon class="name" points="56,112.5 115,112.5 120,127.5 115,142.5 56,142.5" fill="#000000" stroke="#FFFFFF"></polygon>
+    <polygon class="name" points="56,112.5 115,112.5 120,127.5 115,142.5 56,142.5" fill="#333333" stroke="#FFFFFF"></polygon>
     <text dy=".3em" text-anchor="middle" x="86.125" y="127.5" fill="#FFFFFF">li</text>
     <rect class="list" height="30" width="24" x="165" y="112.5" fill="#000000" stroke="#FFFFFF"></rect>
     <text dy=".3em" text-anchor="middle" x="177" y="127.5" fill="#FFFFFF">1</text>
@@ -28,7 +28,7 @@
     <rect class="list" height="30" width="24" x="237" y="112.5" fill="#000000" stroke="#FFFFFF"></rect>
     <text dy=".3em" text-anchor="middle" x="249" y="127.5" fill="#FFFFFF">100</text>
     <path class="arrow" d="M 120,127 C 131,127 131,127 142,127 C 153,127 153,127 165,127" fill="none" stroke="#FFFFFF" marker-end="url(#id17)"></path>
-    <polygon class="name" points="71,157.5 115,157.5 120,172.5 115,187.5 71,187.5" fill="#000000" stroke="#FFFFFF"></polygon>
+    <polygon class="name" points="71,157.5 115,157.5 120,172.5 115,187.5 71,187.5" fill="#333333" stroke="#FFFFFF"></polygon>
     <text dy=".3em" text-anchor="middle" x="93.625" y="172.5" fill="#FFFFFF">val</text>
     <circle class="int value" cx="180" cy="172.5" r="15" fill="#000000" stroke="#FFFFFF"></circle>
     <text dy=".3em" text-anchor="middle" x="180" y="172.5" fill="#FFFFFF">100</text>
