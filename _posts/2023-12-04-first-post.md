@@ -1,5 +1,5 @@
 ---
-title: 첫 포스트
+title: Github Blog 설치
 date: 2023-12-04 23:11:00 +0800
 categories: [Blogging, Tutorial]
 tags: [github, blog]
@@ -90,3 +90,19 @@ Bundler version 2.4.22
 ```
 
 설치 완료!
+
+중요한 건, bundle 실행 전 ruby 버전이 3 이상인지 체크해야 한다. 그 이하의 버전에서 bundle을 통해 모듈을 설치 할 경우 테마에서 사용하는 모듈과 호환되지 않는 경우가 있어서 검색, 다크모드와 같은 기능이 비정상적으로 동작 할 수 있다.
+
+## node.js 모듈 설치
+처음 설치 할 때 이 부분을 놓쳐 몇시간동안 헤맨적이 있다. node.js 모듈을 설치하지 않으면 `assets/js/dist/*.min.js Not Found`에러가 뜨기 때문에 설치 해주자.
+
+```colsole
+npm install && npm run build
+```
+
+설치 후 로컬에서 빌드 해보자.
+```console
+bundle exec jekyll serve
+```
+
+로컬에서 `http://127.0.0.1:4000/`주소로 정상적으로 표시가 된다면 세팅 완료!

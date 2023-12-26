@@ -4,6 +4,7 @@ date: 2023-12-13 20:29:00 +0800
 categories: [Language, Python]
 tags: [python, variables, objects, object-oriented programming, memory management, variable formation, programming language, object model, dynamic typing, programming basics]
 use_math: true
+img_pth: /assets/img/post/pyob/
 ---
 # Python
 다른 언어들은 변수를 선언할 때 타입을 함께 명시해 준다. 하지만 파이썬은 변수 타입과 메모리 할당을 따로 해주지 않아도 된다는 점에서 코딩 입문자가 접하기 쉬운 언어인 것 같다. 하지만 파이썬은 다른 언어와 어떻게 차이가 있길래 변수 선언 방식이 다른걸까?
@@ -270,7 +271,7 @@ print(f"{c is d}")      # False
 
 Python에서는 효율성의 이유로 작은 정수(보통 -5 ~ 256)는 캐시되고 재사용이 된다. `2 + 2`연산을 수행하면 Python은 캐시에서 정수 `4`를 나타내는 동일한 객체를 사용하게 된다. 첫번째 경우에서 `a`와 `b`가 메모리에서 동일한 값을 참조하고 `is`연산에서 `True`를 반환하게 되는 것이다.
 
-하지만 `1000 + 1`과 같이 범위를 넘어서는 정수의 경우, 같은 방식으로 캐시하지 않는다. 이 경우 값은 같지만 두개의 서로 다른 정수 객체가 메모리에 생성되어 식의 각 면에 있는 덧셈의 결과를 나타낸다. 따라서 두개의 면이 메모리의 서로 다른 값을 참조하기 때문에 ID 검사에서 `False`를 반환하게 되는 것이다.
+하지만 `1000 + 1`과 같이 범위를 넘어서는 정수의 경우, 같은 방식으로 캐시하지 않는다. 이 경우 값은 같지만 두개의 서로 다른 정수 객체가 메모리에 생성되어 식의 각 변에 있는 덧셈의 결과를 나타내고 각 이름이 각각의 데이터를 가리킨다. 따라서 두개의 이름이 메모리의 서로 다른 값을 참조하기 때문에 ID 검사에서 `False`를 반환하게 되는 것이다.
 
 ```python
 print(hex(id(a)))      # '0x102baa990'
