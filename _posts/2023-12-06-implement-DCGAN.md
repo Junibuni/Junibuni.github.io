@@ -143,7 +143,7 @@ Discriminator의 loss가 100으로 수렴하고 Generator의 loss가 0으로 수
 
 FID는 GAN을 이용해 생성된 데이터의 집합과 실제 생성하고자 하는 데이터 분포의 거리를 계산한다. 거리가 가까울수록 좋은 질의 데이터로 판단할 수 있다. FID 값을 산출하기 위해 사용되는 모델은 [Inception v3 모델](https://arxiv.org/pdf/1512.00567v3.pdf)의 coding layer 값을 사용한다고 한다. Inception v3 모델은 아래 그림과 같다. 여기서 coding layer는 가장 마지막 2048 채널의 pooling layer로 이미지 클래스를 분류하는 레이어 직전의 레이어이다. 다른 pretrained 모델이라해도 분류직전의 layer 값을 사용하면 FID를 산출할 수 있다.
 
-<img src="{{page.img_pth}}inception_v3.png" width="256">
+<img src="{{page.img_pth}}inception_v3.png">
 
 Inception 모델을 사용해서 FID를 계산하는 원리는 [문헌](https://arxiv.org/pdf/1706.08500.pdf)을 참조. FID의 정의는 다음과 같다.
 
