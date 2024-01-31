@@ -1,6 +1,6 @@
 ---
 title: DCGAN 구현
-date: 2023-12-07 21:25:00 +0800
+date: 2024-01-10 21:25:00 +0800
 categories: [AI, GAN]
 tags: [dcgan, deep learning, cnn, image generation, neural network, ml, ai, gan, image synthesis, computer vision, dnn, image processing, python, pytorch]
 use_math: true
@@ -16,7 +16,7 @@ use_math: true
 
 <img src="{{page.img_pth}}transposed_conv.gif">
 
-일반적으로 conv 연산은 kernel을 input 데이터와 convolution 연산을 해서 하나의 값이 나온다. 하지만 Transposed Conv는 그 반대로 하나의 값을 kernel과의 곱을 한 결과가 output 데이터가 된다 (간단한 경우). 하나의 예시로 stride=2, padding=2, kernel=3, input_size=2인 경우는 위의 gif 이미지와 같다. Convolution의 역 연산은 아니지만, 비슷한 개념으로 이루어지기 때문에, stride=2의 의미는 거꾸로 생각하면 stride 1/2이 된다. stride가 1/2이라는 말은 2번 움직여야 다음 데이터에 도달한다는 말이다. 위 gif에서 파란색 데이터의 한 원소에서 다음 원소까지 도달하는데 sliding이 2번 필요하기 때문에, kernel은 1/2씩 움직이는 개념이 된다.
+일반적으로 conv 연산은 kernel을 input 데이터와 convolution 연산을 해서 하나의 값이 나온다. 하지만 Transposed Conv는 그 반대로 하나의 값을 kernel과의 곱을 한 결과가 output 데이터가 된다 (간단한 경우). 하나의 예시로 stride=2, padding=0, kernel=3, input_size=2인 경우는 위의 gif 이미지와 같다. Convolution의 역 연산은 아니지만, 비슷한 개념으로 이루어지기 때문에, stride=2의 의미는 거꾸로 생각하면 stride 1/2이 된다. stride가 1/2이라는 말은 2번 움직여야 다음 데이터에 도달한다는 말이다. 위 gif에서 파란색 데이터의 한 원소에서 다음 원소까지 도달하는데 sliding이 2번 필요하기 때문에, kernel은 1/2씩 움직이는 개념이 된다.
 
 <img src="{{page.img_pth}}dcgan_implement.png">
 
