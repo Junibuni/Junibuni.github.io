@@ -241,31 +241,38 @@ m_t = \gamma m_{t-1} + \eta g_t
 \theta_{t+1} = \theta_t - m_t
 \\]
 
-Nadam은 이를 약간 변형하여 미래의 모멘텀을 사용하는 효과를 얻는다. 이를 NAG의 파라미터 조정에 반영하면 다음과 같다:
+위와 같이 NAG는 현재 위치 (\\(\theta_t\\))에서 현재 모멘텀 (\\(m_t\\))만큼 이동한 자리에서 기울기를 구한다. 그리고, 이것을 전단계의 모멘텀에 더해줌으로서 현재의 모멘텀을 갱신하는 방식이다. NAG는 파라미터 갱신을 위해서 전단계의 모멘텀 (\\(m_{t-1}\\))를 두번 사용한 것을 볼 수 있다. NAdam은 전단계의 모멘텀을 대신해 현재 모멘텀을 사용해서 미래의 모멘텀을 사용하는 효과를 가지게 했다. 이를 NAG의 파라미터 조정에 반영하면 다음과 같다:
 
 \\[
-g_t = \nabla J(\theta)
+g_t = \nabla J(\theta_t)
 \\]
 
 \\[
-\theta_{t+1} = \theta - (\gamma m_t + \eta g_t)
+\theta_{t+1} = \theta_t - (\gamma m_t + \eta g_t)
 \\]
 
-Adam의 파라미터 수정 부분을 풀어서 작성하면 다음과 같습니다:
+위 방법을 Adam에 적용하기 전, Adam의 파라미터 수정 부분을 풀어서 작성해야 한다:
 
-\\[
-\theta_{t+1} = \theta_t - \frac{\eta}{\sqrt{\hat{v_t}} + \epsilon}\hat{m_t}
-\\]
+$$
+\theta_{t+1} = \theta_t -  \frac{\eta}{\sqrt{\hat{v}_t} + \epsilon} \hat{m}_t
+$$
 
-여기서, \\( \hat{v_t} \\)는 Adam의 이동 평균 두번째 모멘트 추정치이고, \\( \hat{m_t} \\)은 이동 평균 첫번째 모멘트 추정치입니다.
+$$
+\theta_{t+1} = \theta_t - \frac{\eta}{\sqrt{\hat{v}_t} + \epsilon} \left( \frac{\beta_1 m_{t-1}}{1-\beta_1^t} + \frac{(1-\beta_1)g_t}{1-\beta_1^t} \right)
+$$
 
-이러한 미래의 모멘텀을 사용하는 효과를 적용하면 다음과 같이 공식을 수정할 수 있습니다:
+$$
+\theta_{t+1} = \theta_t - \frac{\eta}{\sqrt{\hat{v}_t} + \epsilon} \left( \beta_1 \hat{m}_{t-1} + \frac{(1-\beta_1)g_t}{1-\beta_1^t} \right)
+$$
+
+
+여기서, \\( \hat{v_t} \\)는 Adam의 이동 평균 두번째 모멘트 추정치이고, \\( \hat{m_t} \\)은 이동 평균 첫번째 모멘트 추정치이다.이러한 미래의 모멘텀을 사용하는 효과를 적용하면 다음과 같이 공식을 수정할 수 있다:
 
 \\[
 \theta_{t+1} = \theta_t - \frac{\eta}{\sqrt{\hat{v_t}} + \epsilon}(\beta_1 m_{t} + \frac{(1-\beta_1)g_t}{1-\beta_1^t})
 \\]
 
-따라서, Nadam은 Adam과 NAG의 아이디어를 결합하여 파라미터를 업데이트하는 과정에서 미래의 모멘텀을 사용하여 최적화의 효율성을 높입니다.
+따라서, Nadam은 Adam과 NAG의 아이디어를 결합하여 파라미터를 업데이트하는 과정에서 미래의 모멘텀을 사용하여 최적화의 효율성을 높일 수 있다는 장점이 있다.
 
 
 
