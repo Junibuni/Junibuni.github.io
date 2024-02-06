@@ -158,7 +158,7 @@ $$
 
 $$\Delta \theta _t = -\frac{\eta}{RMS[g]_t}g_t$$
 
-논문의 저자는 parameter \\(\theta\\)를 업데이트 할 경우 $\Delta \theta$의 단위가 맞지 않다는 것에 주목했다. 간단한 예로 길이(m 단위)를 업데이트 할 때에 속도(m/s 단위)를 이용해서 업데이트 하면 안된다는 것이다. 파라미터를 업데이트 할 때, 
+논문의 저자는 parameter \\(\theta\\)를 업데이트 할 경우 \\(\Delta \theta\\)의 단위가 맞지 않다는 것에 주목했다. 간단한 예로 길이(m 단위)를 업데이트 할 때에 속도(m/s 단위)를 이용해서 업데이트 하면 안된다는 것이다. 파라미터를 업데이트 할 때, 
 
 $$\theta _t = \theta _{t-1}+ \Delta \theta$$
 
@@ -176,9 +176,9 @@ $$\Delta \theta \propto H^{-1}g \propto
 
 위 결과에 이동 평균을 이용하여 미분의 제곱에 대한 RMS를 계산한다.
 
-\\[
+$$
 E[\Delta \theta^2]_t = \gamma E[\Delta \theta^2]_{t-1} + (1-\gamma) \Delta \theta^2_t
-\\]
+$$
 
 여기서 \\(\gamma\\)는 이동 평균 계산 시 사용되는 감마(gamma) 값이다. 파라미터 업데이트를 정리해보면, 
 
@@ -195,10 +195,88 @@ E[\Delta \theta^2]_t = \gamma E[\Delta \theta^2]_{t-1} + (1-\gamma) \Delta \thet
 [Adadelta 논문](https://arxiv.org/abs/1212.5701)
 
 ## RMSprop
+Adagrad와 유사하게, Adadelta에서도 learning rate가 점차 작아지는 문제가 있다. 실제로 Adadelta의 첫 번째 업데이트 식과 동일하다.
+
+$$ E[g^2]_t = 0.9 E[g^2]_{t-1} + 0.1 g^2_t $$
+
+\\[ \theta_{t+1} = \theta_t - \eta \frac{\sqrt{E[g^2]} + \epsilon}{g_t} \\]
+
+적절한 \\(\gamma\\) 값으로 0.9를, \\(\eta\\) 값으로 0.001을 제안했다.
 
 ## Adam
+Adam(Adaptive Moment estimation)은 [Adagrad](#adagrad), [Adadelta](#adadelta), [RMSprop](#rmsprop)과 같이 각 파라미터마다 다른 크기의 업데이트를 적용하는 방법 중 하나이다. 특히, Adadelta에서 사용한 decaying average of squared gradients (\\(E[g^2]_t\\))뿐만 아니라 decaying average of gradients ((\\(E[g]_t\\)))도 업데이트에 사용하게 된다. 이전 기법에서의 moment는 "관성"과 같은 의미였다면, 이 맥락에서 Adam의 이름에 있는 moment의 정체는 통계학에서 사용되는 용어이다. 확률변수 X의 n차 moment를 \\(E[X^n]\\)으로 정의하며, 1차 moment \\(E[X]\\)는 모평균이고, 2차 moment \\(E[X^2]\\)와 1차 moment를 사용해서 모분산을 얻을 수 있다. 이러한 추정이 들어간 Adaptive Moment Estimation(적응적 모멘트 추정)이 Adam의 원리이다.
+
+\\(m_t\\)를 gradient의 1차 moment에 대한 추정치, \\(v_t\\)를 2차 moment에 대한 추정치라고 하자. 그리고 이제는 익숙한 가중평균식을 도입하면 다음과 같다:
+
+\\[ m_t = \beta_1 m_{t-1} + (1 - \beta_1) g_t \\]
+\\[ v_t = \beta_2 v_{t-1} + (1 - \beta_2) g^2_t \\]
+
+\\(m_t\\)와 \\(v_t\\)의 초기값을 0벡터로 주면, 학습 초기에 가중치들이 0으로 편향되는 경향이 있다. 특히 decay rate가 작으면, 즉 \\(\beta_1\\)과 \\(\beta_2\\)가 1에 가까우면 편향이 더 심해지게 된다. 편향을 잡아주기 위해 다음과 같이 bias-corrected를 계산하게 된다:
+
+\\[ \hat{m}_t = \frac{m_t}{1 - \beta^t_1} \\]
+\\[ \hat{v}_t = \frac{v_t}{1 - \beta^t_2} \\]
+
+최종적으로 업데이트 식은 다음과 같다:
+
+\\[ \theta_{t+1} = \theta_t - \eta \frac{\sqrt{\hat{v}_t} + \epsilon}{\hat{m}_t} \\]
+
+논문의 저자는 \\(\beta_1=0.9\\), \\(\beta_2=0.999\\), \\(\epsilon=10^-8\\)을 default 값으로 설정했다.
+
+[Adam 문헌](https://arxiv.org/abs/1412.6980)
 
 ## NAdam
+NAdam은 Nesterov-accelerated Adaptive Memoment Adam으로 NAG와 Adam을 합친 기법이다. 이로 인해 Nadam은 Adam과 NAG의 장점을 결합하여, 빠르고 정확하게 전역 최솟값을 찾을 수 있게 된다.
+
+기존의 NAG에서 모멘텀을 조정하는 식은 다음과 같았다:
+
+\\[
+g_t = \nabla J(\theta_t - \gamma m_{t-1})
+\\]
+
+\\[
+m_t = \gamma m_{t-1} + \eta g_t
+\\]
+
+\\[
+\theta_{t+1} = \theta_t - m_t
+\\]
+
+Nadam은 이를 약간 변형하여 미래의 모멘텀을 사용하는 효과를 얻는다. 이를 NAG의 파라미터 조정에 반영하면 다음과 같다:
+
+\\[
+g_t = \nabla J(\theta)
+\\]
+
+\\[
+\theta_{t+1} = \theta - (\gamma m_t + \eta g_t)
+\\]
+
+Adam의 파라미터 수정 부분을 풀어서 작성하면 다음과 같습니다:
+
+\\[
+\theta_{t+1} = \theta_t - \frac{\eta}{\sqrt{\hat{v_t}} + \epsilon}\hat{m_t}
+\\]
+
+여기서, \\( \hat{v_t} \\)는 Adam의 이동 평균 두번째 모멘트 추정치이고, \\( \hat{m_t} \\)은 이동 평균 첫번째 모멘트 추정치입니다.
+
+이러한 미래의 모멘텀을 사용하는 효과를 적용하면 다음과 같이 공식을 수정할 수 있습니다:
+
+\\[
+\theta_{t+1} = \theta_t - \frac{\eta}{\sqrt{\hat{v_t}} + \epsilon}(\beta_1 m_{t} + \frac{(1-\beta_1)g_t}{1-\beta_1^t})
+\\]
+
+따라서, Nadam은 Adam과 NAG의 아이디어를 결합하여 파라미터를 업데이트하는 과정에서 미래의 모멘텀을 사용하여 최적화의 효율성을 높입니다.
+
+
+
+
+## Optimizer 비교
+아래는 각각의 optimizer의 수렴방식을 가시화한 사진이다. 연구에 의하면 SGD가 Adam에 비해 일반화를 잘하지만, Adam의 속도가 월등히 빠르다는 결과가 있다. 이때문에 많은 연구자들이 SGD와 Adam을 결합하려는 시도를 했고, 그 결과 SWATS라는 optimizer가 개발 되었다. 이 외에도 AMSBound, AdaBound등 Adam을 고도화 시키려는 많은 연구들이 진행중이다.
+
+<img src="{{page.img_pth}}compare_optimizer.png">
+
+<img src="{{page.img_pth}}compare_optimizer.gif">
+
 
 ---
 참고자료
