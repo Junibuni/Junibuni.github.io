@@ -144,7 +144,7 @@ print(modelA.weight.grad) # 여기서는 tensor([...])
 <img src="{{page.img_pth}}Autograd-7.png" width="600">
 
 ### 번외 - torch.detach()
-`tensor.detach()`메소드는 backpropagation시 위 세번째 예시와 같이 그래프를 떼어 놓는 것과 같은 역할을 한다. 주의할 점은 `tensor.detach()`는 기존 텐서와 메모리 공유를 하며 requires_grad에 False를 해주는 기는이다. 따라서 모든 inplace연산은 기존 텐서에 영향을 줄 수 있으며 완전히 분리된 텐서를 얻기 위해서는 `tensor.clone().detach()`를 사용하면 된다. 
+`tensor.detach()`메소드는 backpropagation시 위 세번째 예시와 같이 그래프를 떼어 놓는 것과 같은 역할을 한다. 주의할 점은 `tensor.detach()`는 기존 텐서와 메모리 공유를 하며 requires_grad에 False를 해주는 기능이다. 따라서 모든 inplace연산은 기존 텐서에 영향을 줄 수 있으며 완전히 분리된 텐서를 얻기 위해서는 `tensor.clone().detach()`를 사용하면 된다. 
 
 <img src="{{page.img_pth}}detach_clone.png">
 
