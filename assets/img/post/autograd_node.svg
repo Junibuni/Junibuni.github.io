@@ -1,0 +1,9 @@
+<svg width="350" height="200" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="30" fill="#FFF" stroke="#000" stroke-width="2"/><circle cx="50" cy="50" r="5"/><path stroke="#00F" stroke-width="2" d="M80 50h120"/><circle cx="200" cy="50" r="30" fill="#FFF" stroke="#000" stroke-width="2"/><circle cx="200" cy="50" r="5"/><circle cx="300" cy="50" r="30" fill="#FFF" stroke="#000" stroke-width="2"/><circle cx="300" cy="50" r="5"/><path fill="none" stroke="#000" stroke-width="4" d="M265 15h70v70h-70z"/><path stroke="#000" stroke-width="2" marker-end="url(#a)" d="M50 120v-20"/><text x="50" y="170" text-anchor="middle" font-family="Arial" font-size="14">
+        <tspan x="50" dy="-1em">a</tspan>
+        <tspan baseline-shift="super">L-1</tspan>
+    </text><path stroke="#000" stroke-width="2" marker-end="url(#a)" d="M200 120v-20"/><text x="200" y="170" text-anchor="middle" font-family="Arial" font-size="14">
+        <tspan x="200" dy="-1em">a</tspan>
+        <tspan baseline-shift="super">L</tspan>
+    </text><path stroke="#000" stroke-width="2" marker-end="url(#a)" d="M300 120v-20"/><text x="300" y="170" text-anchor="middle" font-family="Arial" font-size="14">
+        <tspan x="300" dy="-1em">y</tspan>
+    </text><defs><marker id="a" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto" fill="#000"><path d="m0 0 10 3.5L0 7z"/></marker></defs></svg>
