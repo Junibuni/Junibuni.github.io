@@ -15,10 +15,10 @@ use_math: true
 해당 코드는 [github](https://github.com/Junibuni/Study/tree/master/Unet)에 업로드 해두었다.
 
 ## Model selection
-Semantic segmentatinon task에서 널리 쓰이는 상용 모델은 크게 두가지가 있다: U-net과 DeepLabV3+ 모델이 있다. 두 모델을 직접 정량적으로 비교해보지 않아 해당 [문헌](https://www.researchgate.net/publication/349292323_MSU-Net_Multi-Scale_U-Net_for_2D_Medical_Image_Segmentation)에서 정량적으로 비교한 데이터를 참고해 보면, 대부분의 부분에서 U-Net이 미세하게 우수한 성능을 내는 것을 볼 수 있다. 구조적으로도 U-Net이 직관적이기 때문에 U-Net모델을 선택 했다. U-Net에 대한 설명은 이전 (포스트)[../U-Net]에 작성해 두었다.
+Semantic segmentatinon task에서 널리 쓰이는 상용 모델은 크게 두가지가 있다: U-net과 DeepLabV3+ 모델이 있다. 두 모델을 직접 정량적으로 비교해보지 않아 해당 [문헌](https://www.researchgate.net/publication/349292323_MSU-Net_Multi-Scale_U-Net_for_2D_Medical_Image_Segmentation)에서 정량적으로 비교한 데이터를 참고해 보면, 대부분의 부분에서 U-Net이 미세하게 우수한 성능을 내는 것을 볼 수 있다. 구조적으로도 U-Net이 직관적이기 때문에 U-Net모델을 선택 했다.
 
 ## Dataset
-여러 데이터셋을 찾던 중, [roboflow]()에서 제공된 [car damage dataset](https://universe.roboflow.com/projet-ai/car-damage-v3)을 선택했다. 다른 데이터셋보다 제공되는 데이터의 양이 많았고(약 2400장), 차의 파손 종류도 함께 분류하고 싶었기 때문에 5개의 class가 있는 해당 데이터셋을 선택했다. 5가지의 class는 다음과 같다.
+여러 데이터셋을 찾던 중, `roboflow`에서 제공된 [car damage dataset](https://universe.roboflow.com/projet-ai/car-damage-v3)을 선택했다. 다른 데이터셋보다 제공되는 데이터의 양이 많았고(약 2400장), 차의 파손 종류도 함께 분류하고 싶었기 때문에 5개의 class가 있는 해당 데이터셋을 선택했다. 5가지의 class는 다음과 같다.
 
 - Dent
 - Glass Break
@@ -194,7 +194,7 @@ Metric으로는 `dice`, `f1`, `acc`, `precision`, `recall`, `jaccard`를 사용�
 
 <img src="{{page.img_pth}}compareallunetloss.png" width="480">
 
-스케쥴러를 사용한 뒤의 결과가 크게 다르지 않았다. Validation Loss 자체가 감소하지 않는 현상의 문제보다 train loss의 진동이 심하고 predicted mask의 성능이 좋지 않아 pretrained된 `vgg19`, `resnet50`, `efficientnetb0` backbone을 사용하여 학습을 해보았다. 
+스케쥴러를 사용한 뒤의 결과가 크게 다르지 않았다. Vanila Unet은 기존 문헌에서 흑백채널의 이미지에 대한 실험이였고, 세포의 테두리를 탐지하는 비교적 간단한 테스크였다. 하지만 해당 데이터는 RGB 차원을 가지는 이미지에 대한 테스크이며, mask의 모양도 비교적 복잡하기 때문에 vanila unet의 레이어가 너무 얕거나 피쳐맵의 채널수가 부족하다고 느꼈다. 이 실험에서 validation Loss 자체가 감소하지 않는 현상의 문제보다 train loss의 진동이 심하고 predicted mask의 성능이 좋지 않아 pretrained된 `vgg19`, `resnet50`, `efficientnetb0` backbone을 사용하여 학습을 해보았다. 깊은 레이어를 가진 구조이기도 하며, 더욱 더 세부적인 피처를 추출할 수 있기 때문에 위 모델을 선택했다.
 
 ### VGG vs Resnet vs Efficientnet
 `vgg19`, `resnet50`, `efficientnetb0` 세가지 모델 모두 convolutional layer를 사용하여 feature extraction을 한다는 특징이 있다. 이 과정에서 인풋 영상의 크기가 반으로 줄어드는 레이어가 있는데, 이를 이용하여 Unet의 backbone으로 사용이 가능하다. 아래는 `torchvision.models`에서 데이터의 크기가 반으로 줄어드는 레이어를 추출하기 위해 저장한 dictionary이다. 예를 들어 `efficientnetb0`모델은 `features.1`, `features.2`, `features.3`, `features.5`, `features.7` 레이어에서 데이터의 사이즈가 반으로 줄어들고, 각 레이어는 `features.7`레이어 부터 [320, 112, 40, 24, 16]채널을 가지게 된다(reversed).
@@ -246,6 +246,8 @@ def extract_features(model, input_tensor, layer_names):
 
         return extracted_features
 ```
+
+일단 정량적으로 비교해보면 결과는 아래와 같다. 왼쪽 위부터 오른쪽 아래까지 `UNet`, `VGG19`, `ResNet50`, `EfficientNetb0`모델의 학습 결과이다.
 
 ### Resnet with FocalLoss
 
