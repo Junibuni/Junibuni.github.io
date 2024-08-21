@@ -1,5 +1,5 @@
 ---
-title: Git 경고 메세지 - LF will be replaceb by CRLF
+title: Git 경고 메세지 - LF will be replaced by CRLF
 date: 2024-07-31 20:31:00 +0800
 categories: [Git, Warning]
 tags: [git, version control, devops]
