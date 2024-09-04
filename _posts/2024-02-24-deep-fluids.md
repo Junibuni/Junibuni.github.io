@@ -12,13 +12,81 @@ use_math: true
 
 ## Introduction
 ### Traditional Machine Learning / Deep learning
-Random forest 모델과 같이 machine learning기법은 정교하게 다듬어진 feature(특징)을 필요로 하기 때문에 일반성이 떨어지게 된다. 딥러닝 방법을 사용해 하나의 time step에 대한 압력장을 구하기 위해 CNN 기법을 사용
-여러 time step에 대해 압력장을 예측하는데 LSTM 기반 방법을 사용
-위와 같은 기법은 pressure projection 단계에서만 작동하기 때문에 divergence-free 를 만족시키지 못함
-여러 ML/DL 연구가 진행되었지만 모두 initial condition 을 받아 하나의 steady state solution을 예측할 뿐 시뮬레이션은 불가능함
-또한 모든 연구가 2D에서 진행 됨
+Random forest 모델과 같이 machine learning기법은 정교하게 다듬어진 feature(특징)을 필요로 하기 때문에 일반성이 떨어지게 된다. 보통 딥러닝 방법을 사용해 하나의 time step에 대한 압력장을 구하기 위해 CNN 기법을 사용하게 되고, 여러 time step에 대해 압력장을 예측하는데에는 LSTM 기반 방법을 사용한다. 이와 같은 기법은 pressure projection 단계에서만 작동하기 때문에 divergence-free 를 만족시키지 못하게 된다. 여러 ML/DL 연구가 진행되었지만 모두 initial condition 을 받아 하나의 steady state solution을 예측할 뿐 시뮬레이션은 불가능하다. 또한 모든 연구가 2D에서 진행 된다는 점에서 한계가 명확하다. [Ladický, L'ubor, et al.]
 
+### Reduce Order Method (ROM)
+일반적으로 시뮬레이션을 진행 할 때, 연산량이 많이 요구되기 때문에 기존 차원에서 subspace로 매핑해주면서 차원을 축소하는 과정이 필요하고, 이를 ROM 이라고 한다. ROM 이 사용하는 basis function (i.e. Laplacian Eigenfunctions)은 일반적으로 선형적으로 작동하게 된다. 추가적인 기법으로 선형적 representation을 비선형 manifold에 올려놓는 작업을 진행하게 된다. 이 과정에서 explosion of subspace dimensionality 현상이 일어날 수 있다. 이를 해결하고자 해당 논문의 저자는 CNN 기반 비선형 manifold learning을 진행했다.
 
+전통적인 SVD 기반 subspace 알고리즘을 사용할 경우에 20~ 시간이 걸리지만, iterative convolutional network를 사용함으로써 속도가 개선이 되었다. 데이터를 추출하는데 기존 cpu 기반 방법보다 700배 이상 빨랐으며, 데이터 압축률은 1300배 단위로 압축이 가능하다고 주장한다. 따라서 준실시간 해석이 가능하다.
+
+<img src="{{page.img_pth}}deepFluidsStats.png">
+
+## Implementation
+### Generative Model
+논문의 저자는 기존 모델들의 단점을 보완하기 위해 generative model을 사용했다. Output의 크기는 [H, W, D V<sub>dim</sub>] 의 크기를 가지며, \\(D=1 (2D), 3 (3D)\\)로, V<sub>dim</sub>은 벡터장의 차원수 이다. Input (c vector)의 크기는 \\(\frac{H}{2^q}\times \frac{W}{2^q}\times \frac{D}{2^q}\times 128\\)를 가진다. 128은 실험 결과 가장 최적의 값이라고 한다. 각 layer당 q번의 Big Block (BB)를 계산하고, 각 BB당 N번 (저자는 N=4~5 사용)의 Small Block (SB)를 사용했다. 여기서, \\(q \geq 0\\), \\(d_{\text{max}} = \max(H, W, D)\\) 이고 \\(q = \log_2(d_{\text{max}}) - 3\\)이다. 마지막 레이어에는 output 차원을 맞춰주기 위해 추가적인 convolutional layer를 사용한다. 
+
+<img src="{{page.img_pth}}smallbigblock.png">
+
+저자는 이미지의 차이를 계산하기 위해 기본적인 L1, L2 norm을 사용하지 않고 divergence-free motion을 보장하기 위해 아래와 같은 손실함수를 사용했다.
+
+$$L_G(\mathbf{c}) = \left\| \mathbf{u}_c - \nabla \times \mathbf{G}(\mathbf{c}) \right\|_1
+$$
+
+하지만 compressible flow 와 같은 영역을 다룰 때에는 direct inference를 사용했다.
+
+$$L_G(\mathbf{c}) = \left\| \mathbf{u}_c - \mathbf{G}(\mathbf{c}) \right\|_1
+$$
+
+두가지 방법의 차이는 아래와 같다. 실험 결롸, incompressible loss 사용시 성능이 향상되었다고 한다.
+
+<img src="{{page.img_pth}}deepfluid_losses.png">
+
+속도장에 대한 L1 distance만 사용할 경우, 노이즈가 발생하거나 vorticity, shear, divergence등 second-order의 정보를 제대로 인코딩 하지 못하는 단점이 있다. 따라서 추가적인 divergence loss도 사용하여 보완했다. (저자는 \\(\lambda_{\mathbf{u}} = \lambda_{\nabla \mathbf{u}} = 1\\) 사용)
+
+$$L_G(\mathbf{c}) = \lambda_{\mathbf{u}} \left\| \mathbf{u}_c - \hat{\mathbf{u}}_c \right\|_1 + \lambda_{\nabla \mathbf{u}} \left\| \nabla \mathbf{u}_c - \hat{\nabla \mathbf{u}}_c \right\|_1
+$$
+
+### Parameterizations - AutoEncoder
+단순한 시뮬레이션의 경우 generative model로도 충분히 해석이 가능하지만, 역동적인 해석 (i.e. source가 움직이는 해석, 가변 inlet flux를 가지는 해석 등)은 고정된 parameter 개수를 가지는 것이 아니라 time frame 개수만큼의 길이를 갖게 된다. 즉, 프레임 개수에 따라 선형적으로 파라미터 개수가 증가한다. 따라서 생성모델 외에 인코더 아키텍처를 추가 함으로서 reduced vector를 추출한 뒤, time integration network와 결합하여 해결했다. 생성 아키텍처와 반대로 속도장 𝒖를 \\(\mathbf{c} = [\mathbf{z}, \mathbf{p}] \in \mathbb{R}^n
+\\)으로 매핑하며, \\(\mathbf{z} \in \mathbb{R}^{n-k}
+\\)는 비지도학습 방식으로 추출된 reduced latent space이다. \\(\mathbf{p} \in \mathbb{R}^k
+\\)는 특정 attribute를 컨트롤 하기 위한 지도방식의 parameterization
+이를 통해 sparser latent space를 얻을 수 있고, 속도장의 reconstruction에도 좋은 영향을 끼친다. 예시로 오른쪽 그림은 n=16, p=[x_좌표, z_좌표]를 사용한다.
+
+$$L_{AE}(\mathbf{c}) = \lambda_{\mathbf{u}} \left\| \mathbf{u}_c - \hat{\mathbf{u}}_c \right\|_1 + \lambda_{\nabla \mathbf{u}} \left\| \nabla \mathbf{u}_c - \hat{\nabla \mathbf{u}}_c \right\|_1 + \lambda_{\mathbf{p}} \left\| \mathbf{p} - \hat{\mathbf{p}} \right\|_2^2
+$$
+
+<img src="{{page.img_pth}}deepfluidAE.png
+">
+
+### Latent Space Integration Network
+Latent Space Integration Network는 시간에 따른 확산을 velocity field states (\(\mathbf{z}\))를 통해 학습하게 된다. 시간에 따른 확산을 LSTM과 같은 모델처럼 시간을 변수로 두어 학습하지 않고, FC 레이어를 사용하여 “manifold navigator”로 사용했다.
+
+$$
+T(\mathbf{x}_t) : \mathbb{R}^{n+k} \to \mathbb{R}^{n-k}
+$$
+$$
+\mathbf{x}_t = [\mathbf{c}_t; \Delta \mathbf{p}_t] = [\mathbf{z}_t; \mathbf{p}_t; \Delta \mathbf{p}_t] \in \mathbb{R}^{n+k}
+$$
+
+다음 스텝의 \(\mathbf{z}\), \(\mathbf{z}_{t+1}\),은 아래와 같이 계산된다.
+$$
+\mathbf{z}_{t+1} = \mathbf{z}_t + T(\mathbf{x}_t)
+$$
+미래의 \(\mathbf{z}\) 값을 사용하여 loss function을 계산하게 된다:
+$$
+L_T(\mathbf{x}_t, \ldots, \mathbf{x}_{t+w-1}) = \frac{1}{w} \sum_{i=t}^{t+w-1} \left\| \Delta \mathbf{z}_i - T_i \right\|_2^2
+$$
+
+<img src="{{page.img_pth}}deepfluidsFC.png
+">
+
+### Inference
+
+## Result
+
+## Discussion
+### Limitation
 ---
 참고자료
 - *<Ladický, L'ubor, et al. "Data-driven fluid simulations using regression forests." ACM Transactions on Graphics (TOG) 34.6 (2015): 1-9.>*
