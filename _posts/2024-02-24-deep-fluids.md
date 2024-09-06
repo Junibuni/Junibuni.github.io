@@ -56,8 +56,7 @@ $$
 $$L_{AE}(\mathbf{c}) = \lambda_{\mathbf{u}} \left\| \mathbf{u}_c - \hat{\mathbf{u}}_c \right\|_1 + \lambda_{\nabla \mathbf{u}} \left\| \nabla \mathbf{u}_c - \hat{\nabla \mathbf{u}}_c \right\|_1 + \lambda_{\mathbf{p}} \left\| \mathbf{p} - \hat{\mathbf{p}} \right\|_2^2
 $$
 
-<img src="{{page.img_pth}}deepfluidAE.png
-">
+<img src="{{page.img_pth}}deepfluidAE.png">
 
 ### Latent Space Integration Network
 Latent Space Integration Network는 시간에 따른 확산을 velocity field states (\(\mathbf{z}\))를 통해 학습하게 된다. 시간에 따른 확산을 LSTM과 같은 모델처럼 시간을 변수로 두어 학습하지 않고, FC 레이어를 사용하여 “manifold navigator”로 사용했다.
@@ -78,15 +77,34 @@ $$
 L_T(\mathbf{x}_t, \ldots, \mathbf{x}_{t+w-1}) = \frac{1}{w} \sum_{i=t}^{t+w-1} \left\| \Delta \mathbf{z}_i - T_i \right\|_2^2
 $$
 
-<img src="{{page.img_pth}}deepfluidsFC.png
-">
-
-### Inference
+<img src="{{page.img_pth}}deepfluidsFC.png">
 
 ## Result
+2D smoke plumes 해석 결과이다. 지도학습의 변수는 1개로 (px)로, smoke source의 위치를 나타낸다. 학습한 적이 있는 (px=0.5)데이터에 대해서는 Ground Truth 값과 거의 유사한 것을 확인 할 수 있다. (첫번째 그림) 학습한 적이 없는 데이터의 경우 interpolation 성능은 두번째 그림 (아래)와 같다. 직접적으로 일치하지 않은 파라미터이지만, 준수한 성능을 보여주는 것을 볼 수 있다.
+
+<img src="{{page.img_pth}}2dsmokeplumes.png">
+
+<img src="{{page.img_pth}}2dsmokeplumsinterpolate.png">
+
+아래는 3D smoke cases이다. 인풋 파라미터는 구의 중심 위치(p<sub>x</sub>) 10가지이고, 각 샘플당 660 프레임이므로 총 6600개의 데이터셋을 이용하여 학습된 결과이다. p<sub>x</sub>=0.44 (1st col) 과 0.5 (4th col)의 현상이 매우 다름에도 불구하고 semantic representation 을 성공적으로 수행한 것을 볼 수 있다. 또한, 데이터가 꽤 sparse 함에도 불구하고 좋은 성능을 보여준다.
+
+<img src="{{page.img_pth}}3dsmokecases.png">
 
 ## Discussion
+딥러닝 기반의 방법론이므로 데이터의 품질에 따라 성능이 결정되게 된다. 낮은 주사율, 파라미터 (inlet 위치, 개수 등)에 따라 성능에 차이가 생길 수 있다. (디테일한 부분 구현 불가) 하지만, 장점으로는 특별한 boundary condition 없이 학습/해석이 가능하다는 것이다. 구조물에 침투하는 현상이 아예 없는것은 아니지만, 성능에 영향을 줄만큼의 오차는 생기지 않는다. 아래는 다른 기법과 (Lin. et al) 저자의 기법(CNN)을 비교한 사진이다. 이를 보면 boundary를 성공적으로 모사 할 수 있는 것으로 보인다. 하지만, 복잡한 형상을 가진 구조물에 대한 성능은 미지수이다.
+
+<img src="{{page.img_pth}}deepfluidCompare.png">
+
 ### Limitation
+아래 그림은 inlet의 위치, 넓이, 시간을 학습된 범위 바깥 range 의 값으로 시뮬레이션을 진행한 결과이다. 10%까지는 어느정도 예측이 정상 범주내에서 이루어지지만 20%이상의 extrapolation은 성능이 저하되는 것을 볼 수 있다.
+
+<img src="{{page.img_pth}}deepfluidsInterpolation.png">
+
+이 외에도 해당 모델의 limitation 은:
+- 굉장히 다양한 상황들에 대한 (임의의)velocity field를 reconstruction하는 데에 한계가 있음
+- 특정 boundary condition에 대한 physical constraints가 존재하지 않음
+- 즉, 학습한 데이터와 유사한 상황에서만 interpolation, extrapolation, reconstruction 등이 잘 수행될 수 있음
+
 ---
 참고자료
 - *<Ladický, L'ubor, et al. "Data-driven fluid simulations using regression forests." ACM Transactions on Graphics (TOG) 34.6 (2015): 1-9.>*
