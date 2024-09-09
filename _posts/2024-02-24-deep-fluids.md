@@ -64,6 +64,7 @@ Latent Space Integration Network는 시간에 따른 확산을 velocity field st
 $$
 T(\mathbf{x}_t) : \mathbb{R}^{n+k} \to \mathbb{R}^{n-k}
 $$
+
 $$
 \mathbf{x}_t = [\mathbf{c}_t; \Delta \mathbf{p}_t] = [\mathbf{z}_t; \mathbf{p}_t; \Delta \mathbf{p}_t] \in \mathbb{R}^{n+k}
 $$
