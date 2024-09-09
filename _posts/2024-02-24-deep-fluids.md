@@ -1,5 +1,6 @@
 ---
 title: [논문리뷰] Deep Fluids
+published: true
 date: 2024-02-24 11:46:00 +0800
 categories: [AI, Application]
 tags: [ai, deep learning, generative Model, fluid dynamics, graphics, simulation]
