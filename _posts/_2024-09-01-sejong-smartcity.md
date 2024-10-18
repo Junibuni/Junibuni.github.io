@@ -18,266 +18,55 @@ ANUGA와 같은 수치 해석기는 천수 방정식(Shallow Water Equation)을 
 
 
 
-## Model selection
-Semantic segmentatinon task에서 널리 쓰이는 상용 모델은 크게 두가지가 있다: U-net과 DeepLabV3+ 모델이 있다. 두 모델을 직접 정량적으로 비교해보지 않아 해당 [문헌](https://www.researchgate.net/publication/349292323_MSU-Net_Multi-Scale_U-Net_for_2D_Medical_Image_Segmentation)에서 정량적으로 비교한 데이터를 참고해 보면, 대부분의 부분에서 U-Net이 미세하게 우수한 성능을 내는 것을 볼 수 있다. 구조적으로도 U-Net이 직관적이기 때문에 U-Net모델을 선택 했다.
-
-## Dataset
-여러 데이터셋을 찾던 중, `roboflow`에서 제공된 [car damage dataset](https://universe.roboflow.com/projet-ai/car-damage-v3)을 선택했다. 다른 데이터셋보다 제공되는 데이터의 양이 많았고(약 2400장), 차의 파손 종류도 함께 분류하고 싶었기 때문에 5개의 class가 있는 해당 데이터셋을 선택했다. 5가지의 class는 다음과 같다.
-
-- Dent
-- Glass Break
-- Scratch
-- Smash
-- Background
-
-데이터셋의 형식은 JSON 형식으로 제공되며, 크게 5가지 정보로 이루어져 있다. 
-
-- Info: 데이터셋의 생성 정보
-- License: 이미지 파일들의 라이센스 정보
-- Categories: 카테고리의 ID, 이름, sub-category
-
-```json
-"categories": [
-        {
-            "id": 0,
-            "name": "car-damages",
-            "supercategory": "none"
-        },
-        {
-            "id": 1,
-            "name": "dent",
-            "supercategory": "car-damages"
-        },
-        {
-            "id": 2,
-            "name": "glass_break",
-            "supercategory": "car-damages"
-        },
-        {
-            "id": 3,
-            "name": "scratch",
-            "supercategory": "car-damages"
-        },
-        {
-            "id": 4,
-            "name": "smash",
-            "supercategory": "car-damages"
-        }
-]
-```
-
-- Images: 이미지들의 고유 ID, 파일명, width, height정보
-
-```json
-"images": [
-        {
-            "id": 0,
-            "license": 1,
-            "file_name": "43_jpg.rf.0ace9ba486923c24670f7cf0aa54b67f.jpg",
-            "height": 640,
-            "width": 640,
-            "date_captured": "2023-05-12T07:03:37+00:00"
-        },
-]
-```
-
-- Annotations: Image ID, 여러개의 object ID , bbox, segmentation 등 이미지의 상세 정보
-
-### Data Pre-processing
-Coco 데이터셋은 train(70%), valid(20%) 그리고 test(10%)으로 나눠져 있다. Coco dataset을 쉽게 조작 할 수 있는 `pycocotools`를 사용하여 id, annotations, masks등 불러오는 기능을 구현해 테스트 해보았다.
-
-| ![]({{page.img_pth}}img_with_mask.png) | ![]({{page.img_pth}}only_mask.png) |
-
-
-랜덤으로 데이터를 선택하여 image with mask와 mask label을 그려보았다. Mask 이미지를 보면 해당 사진은 2(glass-break)와 4(smash) 정보가 있는 것을 확인 할 수 있다. 추후에 model output을 보기 쉽게 하기 위해 각 카테고리를 특정 색에 매핑을 해주었다. 초록, 파랑, 빨강, 노랑 (background 제외)순으로 1, 2, 3, 4번째 카테고리와 매핑시켜주었다. 
-
-
-| ![]({{page.img_pth}}unet_train_bar.png) | ![]({{page.img_pth}}unet_valid_bar.png) | ![]({{page.img_pth}}unet_test_bar.png) |
-
-각 카테고리별 데이터 분포는 비교적 고르게 분포해 있었다. 하지만 segmentation task는 다른 task와 다르게 픽셀 단위로 예측을 진행하기 때문에 각 픽셀이 속하는 클래스의 분포도를 출력해 보았다.
-
-<img src="{{page.img_pth}}unet_pixel_bar.png" width="380">
-
-Background의 비중은 약 82%를 차지하고, 나머지는 각각 6%, 3%, 2%, 7%의 비중을 차지한다. 이와 같은 class 불균형은 몇가지 문제의 원인이 될 수 있다. 해당 케이스에서 background 비중이 80%이상을 차지하기 때문에, 대부분의 예측값은 학습에 기여하지 않는, 혹은 쉽게 예측 가능한 easy negative이므로, 비효율적인 학습이 될 수 있다. 또한 background 비중이 압도적으로 크기 때문에, 전체 loss 또는 gradient를 계산할 때 easy negative의 영향이 커지게 된다. 이러한 상황을 인지하고 추후에 cross entropy에 가중치를 부여하는 `focal loss`도 하나의 옵션으로 둔다.
-
-일반적인 `Cross Entropy`는 모델이 잘 예측한 것보다 잘못 예측한 것에 대해 더 큰 페널티를 주는 방식으로 작동한다. 잘 예측하면 보상은 없고 페널티도 없지만, 잘못 예측하게 되면 보상은 없고 페널티가 커지게 된다. `Focal Loss`는 cross entropy 항에 가중치 텀을 추가하여 easy example의 가중치를 줄이고, hard negative example의 학습에 초점을 맞추는 역할을 한다.
+## 모델 구현 방법
 
-\\[
-    \text{FL}(p_t)=-\alpha_t(1-p_t)^\gamma \text{log}(p_t)
-\\]
+이번 프로젝트의 핵심은 AI 모델을 통해 스마트 시티 환경에서 침수 예측의 속도와 효율성을 극대화하는 것입니다. 이를 위해 **Autoencoder**와 **LSTM(Long Short-Term Memory)** 모델을 결합하여 물리 기반 시뮬레이션의 복잡한 계산을 대체할 수 있는 예측 모델을 구현하였습니다. 이 과정에서는 **BigBlock-SmallBlock 구조**를 도입한 Autoencoder와 시계열 데이터를 다루는 LSTM을 활용하여, 침수 현상 예측에서 중요한 물리적 특징을 효과적으로 추출하고, 이를 바탕으로 시뮬레이션을 가속화하는 데 중점을 두었습니다.
 
-위 식을 보면 \\(\gamma = 0\\)일 때 `Cross Entropy Loss`와 같아짐을 알 수 있고, \\(\gamma\\)가 커질수록 easy example에 대한 loss가 줄어듦을 알 수 있다. 잘못 분류되어 \\(p_t\\)가 작아지게 되면, 가중치 (focusing parameter)가 1에 가까워지게 되고, \\(\text{log}(p_t)\\)가 커지게 되어 loss가 커지게 된다. 반대로 \\(p_t\\)가 올바를 예측을 할 경우 1에 가까워지게 되며, focusing parameter가 0에 가깝게 되고 \\(\text{log}(p_t)\\) 값은 줄어들게 된다. 따라서 앞의 focusing parameter는 easy example에 대한 loss 비중을 낮추는 역할을 함을 알 수 있다. 요약하자면, focal loss는 잘맞추는 클래스는 비교적 신경쓰지 않도록 하고 잘못 맞추는 케이스에 대해서 학습을 중점적으로 진행한다. 
-
-### DataLoader
-Coco 커스텀 데이터를 이용하기 때문에, 데이터로더를 만들어야한다. `pycocotools`를 사용하여 annotation, Id, image를 읽어와 데이터를 불러오는 모듈을 구현했다. 이때, train set에 대해서 mean과 std를 구하여 데이터를 normalize처리를 해 주었다. Train set의 RGB 채널에 대한 mean 과 std는 [0.5735, 0.5618, 0.5681], [0.2341, 0.2348, 0.2343]로 계산되었다. Mask의 경우, 클래스 개수만큼 one-hot encoded 채널을 만들지 않고, 클래스 인덱스를 이용해 하나의 채널로 만들어주었다. `poly_to_mask`의 코드는 아래와 같이 작성했다.
-
-```python
-def poly_to_mask(self, img_info, anns, merge=True):
-        anns_img = np.zeros((img_info['height'],img_info['width']))
-        for ann in anns:
-            anns_img = np.maximum(anns_img, self.coco.annToMask(ann)*ann['category_id'])
-        return torch.tensor(anns_img, dtype=torch.int64)
-```
-
-배치 단위로 묶이는 사진들을 모두 같은 크기로 만들어주어야 배치크기의 텐서로 만들 수 있다. 이미지 크기가 다르다면 하나의 텐서로 묶일 수 없기 때문에 두가지 방법을 고안해냈다. 첫번째로, image와 mask 모두 배치 단위에서 하나의 사이즈로 resize 하는 것이다. 가장 간편한 방법이지만, resize를 함으로서 segmentaion polygon이 담고 있는 정보의 손실이 생기기 때문에 해당 방법을 사용하지 않았다. 두번째 방법으로는, 배치단위에서 가장 큰 이미지의 사이즈를 추출한 뒤, 나머지 데이터를 사이즈에 맞게 padding 해주는 것이다. 모든 segmentation의 해상도(정보)를 잃지 않으며 배치 단위로 사이즈를 통일화 시켜줄 수 있어, 해당 방법을 선택했다. 구현한 코드는 아래와 같다. 
+### 1. Autoencoder 설계
 
-```python
-def torch_divmod(dividend:torch.Tensor, divisor:int):
-    quotient = dividend.div(divisor, rounding_mode="floor")
-    remainder = torch.remainder(dividend, divisor)
-    return quotient, remainder
-
-def collate_fn(batch):
-    images, masks = zip(*batch)
+**Autoencoder**는 입력 데이터를 저차원의 잠재 벡터로 압축하고, 다시 이를 원래 차원의 데이터로 복원하는 비지도 학습 모델입니다. 이 모델은 복잡한 시뮬레이션 데이터를 효율적으로 압축할 수 있는 특성을 가지고 있어, **Shallow Water Equation**을 기반으로 한 물리적 데이터를 학습하는 데 적합합니다. 
 
-    max_height = max(img.size()[1] for img in images)
-    max_width = max(img.size()[0] for img in images)
-
-    pad_height = max_height - torch.tensor([img.size()[1] for img in images])
-    pad_width = max_width - torch.tensor([img.size()[0] for img in images])
-
-    h_quotient, h_remainder = torch_divmod(pad_width, 2)
-    v_quotient, v_remainder = torch_divmod(pad_height, 2)
-
-    pad_left = h_quotient
-    pad_right = h_quotient + h_remainder
-    pad_top = v_quotient
-    pad_bottom = v_quotient + v_remainder
-
-    padded_images = []
-    padded_masks = []
-
-    for i, image_mask in enumerate(zip(images, masks)):
-        img, mask = image_mask
-        padding = (pad_left[i], pad_top[i], pad_right[i], pad_bottom[i])
-        padded_img = TF.pad(img, padding, fill=0)
-        padded_mask = TF.pad(mask, padding, fill=0)
-
-        padded_images.append(padded_img)
-        padded_masks.append(padded_mask)
+특히, 이번 프로젝트에서는 **BigBlock-SmallBlock** 아키텍처를 도입하여 Autoencoder를 설계하였습니다. 이 구조는 다중 스케일로 데이터를 처리할 수 있는 장점을 가지며, 깊이 있는 특성 추출이 가능합니다.
 
-    return torch.stack(padded_images), torch.stack(padded_masks)
-```
+- **SmallBlock**: 각 SmallBlock은 3x3 커널 크기를 가진 합성곱(convolution) 레이어와 **LeakyReLU** 활성화 함수로 구성되어 있습니다. SmallBlock은 각 레이어에서 데이터를 점진적으로 처리하며, 주요 특징을 추출합니다.
+- **BigBlock**: 여러 개의 SmallBlock이 모여 **BigBlock**을 형성합니다. BigBlock은 입력 데이터를 여러 단계로 처리하며, 각 SmallBlock에서 추출된 특징을 누적하여 최종적으로 고차원 데이터를 압축합니다. BigBlock 내부에서는 입력 데이터를 매 단계에서 스킵 연결(skip connection)하여, 원래 입력 데이터와 처리된 데이터를 함께 결합하여 더욱 풍부한 정보를 학습할 수 있도록 하였습니다.
 
-데이터 로더 작성 후, pytorch lighting의 `LightningDataModule`로 감싸주었다.
+Autoencoder의 **Encoder**는 입력 이미지(침수 현상)를 저차원의 잠재 벡터로 변환하는 역할을 합니다. 이때 입력 이미지에는 물의 깊이와 x, y 방향의 모멘텀이 포함되어 있으며, 이 정보는 각각의 채널로 나뉘어 3채널 이미지 형태로 입력됩니다. 이후, 여러 개의 BigBlock을 통해 특징이 추출되고, 최종적으로 압축된 잠재 벡터가 생성됩니다.
 
-## Implementation / Result
-자동차 파손 부위 예측이라는 task를 하기 위해 Unet 기반 다양한 backbone을 사용하여 결과를 비교해 보았다.
+**Decoder**는 이 잠재 벡터를 다시 원래 차원의 이미지로 복원하는 역할을 합니다. Decoder는 Encoder와 대칭적인 구조를 가지며, 잠재 벡터를 입력받아 다시 원래 이미지로 복원합니다. 이를 통해 침수 예측 시 필요한 물리적 정보를 담은 2D 이미지를 다시 생성할 수 있습니다.
 
-### Unet
-우선, vanila Unet으로 모델을 구현하여 테스트 해 보았다. 모델은 64, 128, 256, 512, 1024 채널을 가지는 contracting path를 가지고 있고, 반대로 올라오는 expanding path를 가지고 있다. 각 모듈마다 skip connection을 이용하여 contracting과 expanding path를 연결해 주었다. Pretrain 되어있지 않은 모델이라 learning rate를 처음엔 조금 크게 사용하였다. 아래는 `lr=1e-3`, `cross_entropy`, `Adam`을 사용한 결과이다.
+### 2. LSTM 기반 시계열 예측 모델
 
-```yaml
-backbone_name: unet
-criterion_params: {}
-in_channels: 3
-loss_fn: crossentropy
-num_classes: 5
-optim_params:
-  betas: !!python/tuple
-  - 0.9
-  - 0.999
-  lr: 0.001
-  weight_decay: 0.0001
-optimizer: !!python/name:torch.optim.adam.Adam ''
-```
+Autoencoder에서 생성된 잠재 벡터는 하나의 시간 단면을 나타내는 정보입니다. 하지만 침수 예측에서는 시간이 흐름에 따라 상태가 변하는 시계열 데이터를 처리해야 하므로, **LSTM(Long Short-Term Memory)** 모델을 도입하여 이를 해결하였습니다.
 
-| <img src="{{page.img_pth}}vanila_unet_trainloss.png"> | <img src="{{page.img_pth}}valid_dice_unet.png"> |
+LSTM은 순환 신경망(RNN)의 한 종류로, 시계열 데이터를 처리하는 데 탁월한 성능을 보입니다. 특히, 시간의 흐름에 따른 **장기 의존성(long-term dependencies)**을 잘 학습할 수 있어, 시뮬레이션 데이터를 기반으로 한 다단계 예측에서 유리합니다.
 
-<img src="{{page.img_pth}}target_mask_unet_project.png">
-*Target Mask*
+- **잠재 벡터 네비게이션**: LSTM 모델은 현재 시점의 잠재 벡터와 추가 변수(예: 맨홀 역류량)를 입력으로 받아, 다음 시점의 잠재 벡터와의 차이를 예측합니다. 이때, LSTM의 입력으로는 현재 상태의 잠재 벡터와 각 시점에서의 **맨홀 역류량** 데이터가 결합됩니다. 이러한 방식은 물리적 현상을 더 정확하게 반영할 수 있으며, 단순히 이전 상태만을 고려하는 것이 아니라 추가 변수까지 통합하여 예측 정확도를 높일 수 있습니다.
+  
+  예를 들어, **현재 시점의 잠재 벡터**와 **맨홀 역류량**이 주어졌을 때, LSTM은 이를 학습하여 **다음 시점에서의 잠재 벡터 변화**를 예측하게 됩니다. 이를 통해 시계열 데이터의 흐름을 파악하고, 시간의 흐름에 따라 물리적 상태가 어떻게 변화하는지를 예측합니다.
 
-<img src="{{page.img_pth}}predmask_unet.png">
-*Predicted Mask*
+### 3. 전체 시뮬레이션 흐름
 
-Metric으로는 `dice`, `f1`, `acc`, `precision`, `recall`, `jaccard`를 사용하여 로깅했다. 하지만 해당 실험의 경우 모든 metric이 좋지 않게 나왔다. 또한 training loss와 validation loss는 학습함에 따라 감소하기는 하지만 이상적으로 감소하지 않으며, loss의 노이즈가 심하다. 정량적인 값들로 예상했듯이 predicted mask를 보면 위치는 대략적으로 캐치해 내지만, 모양이나 클래스는 매우 부정확한것을 볼 수 있다. Train rate를 `1e-4`로 조금 낮추어 학습을 해 보았다. 
+최종적으로, Autoencoder와 LSTM을 결합한 전체 시뮬레이션 예측 과정은 다음과 같습니다:
 
-<img src="{{page.img_pth}}unet_losse-4_trainloss.png" width="480">
+1. **초기 상태 입력**: 시뮬레이션이 시작될 때, 2D 이미지 형태의 물의 깊이 및 모멘텀(x, y 방향)이 Autoencoder의 Encoder에 입력됩니다. 이를 통해 저차원 잠재 벡터가 생성됩니다.
+  
+2. **LSTM을 통한 잠재 벡터 예측**: 생성된 잠재 벡터는 LSTM 모델을 거치며, 시간의 흐름에 따라 각 시점에서 다음 상태의 잠재 벡터가 예측됩니다. 이때, **맨홀 역류량**과 같은 추가 변수도 함께 입력되어 예측의 정확도를 높입니다.
 
-전보다 감소하는 경향이 명확해졌지만 아직도 loss의 노이즈가 심하고, metrics와 predicted mask의 결과도 개선이 없었다. 마지막으로, learning rate scheduling을 해줌으로서 조금이라도 성능에 향상이 있는지 검토해 보았다. LR scheduler로는 `ReduceLROnPlateau`를 사용하였다. 특별한 이유는 없고, metric이나 validation loss의 향상(감소)가 없을 시 lr을 조금씩 줄여나가는 스케쥴러를 사용하기 위해 선택했다. LR scheduler가 다양하게 있어([블로그](https://sanghyu.tistory.com/113)) 추후에 추가적으로 스터디를 진행해 보아야 겠다. 모든 파라미터를 default로 설정한뒤 진행했다. 이후의 실험은 모두 같은 lr scheduler를 사용하였다. 아래는 스케쥴러를 사용한 뒤의 결과이다.
+3. **Decoder를 통한 이미지 복원**: 예측된 잠재 벡터는 다시 Decoder를 통해 원래 차원의 이미지로 복원됩니다. 이를 통해 다음 시점에서의 침수 상태(물의 깊이와 x, y 모멘텀)를 예측할 수 있습니다.
 
-<img src="{{page.img_pth}}compareallunetloss.png" width="480">
+4. **전체 시뮬레이션 반복**: 이 과정을 반복하여 전체 시뮬레이션 과정을 예측하며, 시뮬레이션 결과는 영상 형태로 출력될 수 있습니다. 각 시점에서의 이미지 결과가 모여 **전체 시뮬레이션 영상**이 생성됩니다.
 
-스케쥴러를 사용한 뒤의 결과가 크게 다르지 않았다. Vanila Unet은 기존 문헌에서 흑백채널의 이미지에 대한 실험이였고, 세포의 테두리를 탐지하는 비교적 간단한 테스크였다. 하지만 해당 데이터는 RGB 차원을 가지는 이미지에 대한 테스크이며, mask의 모양도 비교적 복잡하기 때문에 vanila unet의 레이어가 너무 얕거나 피쳐맵의 채널수가 부족하다고 느꼈다. 이 실험에서 validation Loss 자체가 감소하지 않는 현상의 문제보다 train loss의 진동이 심하고 predicted mask의 성능이 좋지 않아 pretrained된 `vgg19`, `resnet50`, `efficientnetb0` backbone을 사용하여 학습을 해보았다. 깊은 레이어를 가진 구조이기도 하며, 더욱 더 세부적인 피처를 추출할 수 있기 때문에 위 모델을 선택했다.
+### 4. 모델 최적화 및 문제 해결
 
-### VGG vs Resnet vs Efficientnet
-`vgg19`, `resnet50`, `efficientnetb0` 세가지 모델 모두 convolutional layer를 사용하여 feature extraction을 한다는 특징이 있다. 이 과정에서 인풋 영상의 크기가 반으로 줄어드는 레이어가 있는데, 이를 이용하여 Unet의 backbone으로 사용이 가능하다. 아래는 `torchvision.models`에서 데이터의 크기가 반으로 줄어드는 레이어를 추출하기 위해 저장한 dictionary이다. 예를 들어 `efficientnetb0`모델은 `features.1`, `features.2`, `features.3`, `features.5`, `features.7` 레이어에서 데이터의 사이즈가 반으로 줄어들고, 각 레이어는 `features.7`레이어 부터 [320, 112, 40, 24, 16]채널을 가지게 된다(reversed).
+모델 구현 과정에서는 여러 문제점들이 발생하였으나, 이를 해결하기 위해 다양한 방법을 적용하였습니다.
 
-```python
-@property
-def layer(self):
-    #skip1, skip2, skip3, skip4, bottleneck
-    layer_concat = {
-        "unet": ["module1", "module2", "module3", "module4", "module5"],
-        "resnet50": ["relu", "layer1", "layer2", "layer3", "layer4"],
-        "efficientnetb0": ["features.1", "features.2", "features.3", "features.5", "features.7"],
-        "vgg19": ["12", "25", "38", "51", "52"],
-    }
-    return layer_concat[self.backbone_name].copy()
+- **추가 변수 처리 문제**: 단순 LSTM 모델에 맨홀 역류량과 같은 추가 변수를 결합하였을 때, 모델이 이를 제대로 처리하지 못하는 문제가 발생하였습니다. 이를 해결하기 위해 **잠재 벡터와 추가 변수를 적절히 결합하는 방식**을 수정하였고, 다중 입력을 처리할 수 있는 구조로 LSTM을 개선하였습니다.
+  
+- **다단계 예측 문제**: LSTM을 이용한 다단계 예측(한 시점의 데이터를 입력하여 다음 시점을 예측하는 방식)이 초기 모델에서는 제대로 작동하지 않았습니다. 이에 따라, LSTM 모델의 학습 방식을 개선하고, 다단계 예측이 가능하도록 모델의 구조를 최적화하였습니다.
 
-@property
-def size(self):
-    #channel size of: bottleneck, skip4, 3, 2, 1
-    size_dict = {
-        "unet": [1024, 512, 256, 128, 64],
-        "resnet50": [2048, 1024, 512, 256, 64],
-        "efficientnetb0": [320, 112, 40, 24, 16],
-        "vgg19": [512, 512, 512, 256, 128],
-    }
-    return size_dict[self.backbone_name].copy()
-```
+- **Autoencoder 학습**: Autoencoder 모델은 물리 기반 시뮬레이션에서 중요한 특징을 학습할 수 있어야 합니다. 이를 위해, 각 채널(물의 깊이, x 방향 모멘텀, y 방향 모멘텀)의 정보를 균등하게 학습하도록 모델 구조를 설계하였으며, 각 특징이 시뮬레이션 결과에 적절히 반영될 수 있도록 학습 과정을 조정하였습니다.
 
-여기서, 각 모델을 backbone으로 불러오고, Unet과 결합하기 위해 다듬어주어야 한다. 위에서 언급 된 레이어들을 추출해야 하고, 원하는 마지막 layer까지 학습 시키도록 설정해야 한다. 처음엔 아래와 같이 `hook` 방법을 사용하여 구현하였다. 해당 방법은 미리 설정해 둔 layer의 결과값을 출력하여 Unet의 skip connection을 가능하게 할 수 있었지만, 원하지 않는 마지막 레이어들은 모두 삭제할 수 없었다. 수동적으로 각 backbone 모델마다 `nn.Identity()`를 사용하여 불필요한 layer를 삭제 할 수 있지만, 다양한 backbone에 대해서 일반화를 시키고자 했기 때문에 리서치를 진행했다. 그러던 중, `torchvision.models.feature_extraction`의 `create_feature_extractor`모듈을 사용하면 원하는 layer를 추출 할 수 있을 뿐만 아니라, 원하는 layer까지 학습이 가능하게 할 수 있었다. 해당 모듈은 모델과 추출하고 싶은 layer를 list로 받고, torch 내부적으로 hook를 걸어 모델을 재건축 하는 것으로 이해했다. 이를 사용하여 원하는 layer를 추출할 수 있음과 동시에 원하는 깊이까지 학습 시키는 방법을 간단하게 구현 할 수 있었다.
+---
 
-```python
-def extract_features(model, input_tensor, layer_names):
-        extracted_features = {}
-
-        def register_hook(name):
-            def hook(module, input, output):
-                extracted_features[name] = output
-            return hook
-        
-        hook_handles = []
-        for name, module in model.named_modules():
-            if name in layer_names:
-                hook_handles.append(module.register_forward_hook(register_hook(name)))
-
-        model(input_tensor)
-
-        for handle in hook_handles:
-            handle.remove()
-
-        return extracted_features
-```
-
-일단 정량적으로 비교해보면 결과는 아래와 같다. 왼쪽 위부터 오른쪽 아래까지 `UNet`, `VGG19`, `ResNet50`, `EfficientNetb0`모델의 학습 결과이다.
-
-### Resnet with FocalLoss
-
-unet_losse-4_trainloss
-random batchidx, stack target and predict, save image
-
-lr pretrained
-lr 줄여보고 loss 바꿔보고
-
-모델을 구현 할때 힘들었던점: hook, feature extraction, 모델 안쓰는 부분 자르기
-coco dataset 처리하는법
-segmentation의 mask는 어떻게 작동하나?
-
-segmentation에 쓰이는 loss들
-- ce
-- miou
-- focal
-
-나머지도 있지만 이렇게 비교하는이유는?
-CE는 틀린거에대해서 harsh?한가? https://woochan-autobiography.tistory.com/929
-focal 의 장점, 각 loss의 장단점, 선택한 이유 (data 각 class별 분포도 추출)
-
-모델은 백본을 선택한 이유? 일단 vanila unet은 왜 안되는지? featuremap inspect!
-백본 써서 좋은이유?
-백본 선택한 이유
-
-모델 평가
-평가방법 나열
-
+이와 같은 AI 모델의 구현을 통해, 기존의 물리 기반 시뮬레이션의 장점을 유지하면서도, 실시간 침수 예측이 가능한 시스템을 개발할 수 있었습니다.
