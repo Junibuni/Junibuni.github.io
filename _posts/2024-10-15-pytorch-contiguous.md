@@ -1,6 +1,6 @@
 ---
 title: PyTorch의 contiguous() 함수 이해하기
-date: 2024-10-29 20:33:00 +0800
+date: 2024-10-15 20:33:00 +0800
 categories: [AI, PyTorch]
 tags: [pytorch, tensor, contiguous, view, reshape, transpose, permute]
 use_math: true
@@ -179,4 +179,6 @@ cta.view(12)  # 정상 동작
 
 ## 참고자료
 
-- * [PyTorch 공식 문서: Tensor Basics](https://pytorch.org/docs/stable/tensors.html)
+- *<https://pytorch.org/docs/stable/tensors.html>*
+- *<https://pytorch.org/docs/stable/generated/torch.Tensor.contiguous.html>*
+- *<https://stackoverflow.com/questions/48915810/what-does-contiguous-do-in-pytorch>*
