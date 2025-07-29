@@ -31,22 +31,23 @@ MPNN의 일반 수식은 다음과 같다:
 \\[
     h_i^{(l+1)} = \text{UPDATE}^{(l)} \left(
     h_i^{(l)},\ 
-    \underset{j \in \mathcal{N}(i)}{\text{AGG}}\
-    \text{MESSAGE}^{(l)}\left(
-    h_i^{(l)},\ h_j^{(l)},\ e_{ij}
+    \underset{j \in \mathcal{N}(i)}{\text{AGG}} \left(
+        \text{MESSAGE}^{(l)}\left(
+            h_i^{(l)},\ h_j^{(l)},\ e_{ij}
+        \right)
     \right)
     \right)
 \\]
 
-| 기호               | 의미                                  |
-| ---------------- | ----------------------------------- |
-| $h_i^{(l)}$      | 노드 $i$의 현재 레이어 $l$에서의 임베딩           |
-| $h_i^{(l+1)}$    | 다음 레이어에서의 임베딩                       |
-| $\mathcal{N}(i)$ | 노드 $i$의 이웃 노드 집합                    |
-| $e_{ij}$         | edge $j \to i$의 feature (선택적)       |
-| MESSAGE          | 메시지를 계산하는 함수 (보통 MLP, Attention 등)  |
-| AGG              | 메시지 집계 함수 (sum, mean, max 등)        |
-| UPDATE           | 메시지 집계 결과로 노드를 갱신하는 함수 (MLP, GRU 등) |
+| 기호               | 의미                                              |
+| ---------------- | ------------------------------------------------- |
+| \\( h_i^{(l)} \\)      | 노드 \\( i \\)의 현재 레이어 \\( l \\)에서의 임베딩           |
+| \\( h_i^{(l+1)} \\)    | 다음 레이어에서의 임베딩                               |
+| \\( \mathcal{N}(i) \\) | 노드 \\( i \\)의 이웃 노드 집합                          |
+| \\( e_{ij} \\)         | edge \\( j \to i \\)의 feature (선택적)              |
+| MESSAGE          | 메시지를 계산하는 함수 (보통 MLP, Attention 등)          |
+| AGG              | 메시지 집계 함수 (sum, mean, max 등)                    |
+| UPDATE           | 메시지 집계 결과로 노드를 갱신하는 함수 (MLP, GRU 등)       |
 
 
 ### 1. 메시지 계산 (Message Function)
@@ -105,17 +106,17 @@ h_i^{(l+1)} = \sigma \left( W \cdot \left(
 
 
 ```python
-edge_index = [[0, 1], [1, 2]]  => 0→1, 1→2
+edge_index = [[0, 1], [1, 2]]  => 0 -> 1, 1 -> 2
 h = [ [0.1, 0.2, 0.3],    # Node 0
        [0.4, 0.5, 0.6],    # Node 1
        [0.7, 0.8, 0.9] ]   # Node 2
 
-e = [ [1.0, 0.0],          # Edge 0→1
-      [0.5, 1.0] ]         # Edge 1→2
+e = [ [1.0, 0.0],          # Edge 0->1
+      [0.5, 1.0] ]         # Edge 1->2
 
-message: concat(h_j, e_ij) → MLP → m_ij
+message: concat(h_j, e_ij) -> MLP -> m_ij
 aggregation: sum
-update: h_i ← h_i + m_i
+update: h_i <- h_i + m_i
 ```
 
 
@@ -154,10 +155,10 @@ MPNN 프레임워크를 따르는 GNN 모델은 굉장히 많다.
 
 | GNN 종류            | message 형태                    | update 방식   |
 | ----------------- | ----------------------------- | ----------- |
-| **GCN**           | $m = h_j$                     | 평균 후 Linear | 
-| **GraphSAGE**     | $m = \text{concat}(h_i, h_j)$ | MLP         |
+| **GCN**           | \\(m = h_j\\)                     | 평균 후 Linear | 
+| **GraphSAGE**     | \\(m = \text{concat}(h_i, h_j)\\) | MLP         |
 | **GAT**           | attention weighted sum        | MLP         | 
-| **NNConv (MPNN)** | $m = f(e_{ij}) \cdot h_j$     | 합 후 Linear |
+| **NNConv (MPNN)** | \\(m = f(e_{ij}) \cdot h_j\\)     | 합 후 Linear |
 
 
 ## 요약 정리
