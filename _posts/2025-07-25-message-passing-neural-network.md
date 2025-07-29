@@ -81,6 +81,17 @@ h_i^{(l+1)} = \text{Update}\left(h_i^{(l)}, m_i^{(l)}\right)
 
 - 업데이트는 보통 MLP 또는 GRU, residual connection 등으로 구현됨.
 
+<div style="display: flex; align-items: center; justify-content: center;">
+  <div style="margin-right: 20px; text-align: center;">
+    <img src="{{page.img_pth}}graph_target_node.png" width="250">
+    <p style="font-size: 14px;">Graph with target node A</p>
+  </div>
+  <div style="margin-left: 20px; text-align: center;">
+    <img src="{{page.img_pth}}graph_target_node_aggregation.png" width="400">
+    <p style="font-size: 14px;">Neighbor message aggregation into node A</p>
+  </div>
+</div>
+
 ## 직관 요약
 
 | 단계 | 수식 | 설명 |
