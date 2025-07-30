@@ -19,7 +19,7 @@ Graph Convolutional Network(GCN)의 핵심 아이디어는, CNN의 강력한 지
 
 <div style="text-align: center;">
   <img src="{{page.img_pth}}network_and_grid.png" alt="Networks vs Grid (Images)" width="500">
-  <p><strong>Figure:</strong> Comparison between Network structures and Grid (Image) structures.</p>
+  <p>Comparison between Network structures and Grid (Image) structures.</p>
 </div>
 
 하지만 그래프 구조는 이미지와 다른 구조를 가지고 있기 때문에 여러가지 어려움이 존재한다:
@@ -63,7 +63,9 @@ GCN은 이웃 노드들의 정보를 정규화된 방식으로 aggregation 하�
 
 GCN은 그래프 위에서 작동하는 신경망으로, 각 노드는 이웃 노드의 정보를 feature aggregation 한 후, 자신의 feature를 update 한다. GCN의 Input과 Output은 아래 그림과 같이 간단히 표현 될 수 있다. (input feature size = 4, output feature size = 2)
 
-![graph convolution]({{page.img_pth}}GCN_output_vectors_per_node.png)
+<div style="text-align: center;">
+  <img src="{{page.img_pth}}GCN_output_vectors_per_node.png" alt="graph convolution" width="700">
+</div>
 
 일반적인 GCN은 정규화된 인접행렬을 통해 표현 될 수 있다:
 
@@ -82,7 +84,9 @@ H^{(l+1)} = \sigma\left(D^{-\frac{1}{2}} (A + I) D^{-\frac{1}{2}} H^{(l)} W^{(l)
 
 직관적으로 수식을 이해한다면, 아래 수식을 참고:
 
-![GCNequation]({{page.img_pth}}GCN_layer_equation_annotated.png)
+<div style="text-align: center;">
+  <img src="{{page.img_pth}}GCN_layer_equation_annotated.png" alt="GCNequation" width="400">
+</div>
 
 ## 인접행렬과 Degree 행렬
 
