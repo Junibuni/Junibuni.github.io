@@ -36,7 +36,7 @@ Graph Convolutional Network(GCN)의 핵심 아이디어는, CNN의 강력한 지
 
 이런 제약을 해결하기 위해 **Graph Convolution**(GCN)이 사용된다.
 GCN은 이웃 노드들의 정보를 정규화된 방식으로 aggregation 하고,
-그 후 학습 가능한 weight를 이용해 transformation하는 방식으로 작동합니다.
+그 후 학습 가능한 weight를 이용해 transformation하는 방식으로 작동한다.
 이는 CNN이 local receptive field에서 feature를 추출하듯, 그래프에서도 local neighborhood의 정보를 추출하는 방식으로 이해할 수 있다.
 
 <div style="display: flex; justify-content: center; align-items: center; gap: 20px;">
@@ -170,7 +170,7 @@ $$
 GNN에서 노드의 이웃 정보를 집계할 때, 이웃 노드들의 중요도를 어떻게 계산하느냐에 따라 결과가 달라질 수 있다. 위 그림은 mean normalization 과 alternative normalization의 차이를 보여준다.
 
 왼쪽 그림에서는 mean normalization를 사용한 경우로, node 4는 자신을 포함한 모든 이웃들로부터 동일한 비중으로 정보를 받는걸 확인 할 수 있다.  
-반면 오른쪽 그림에서는 alternative normalization를 사용한 경우로, 이웃이 적은 node 5는 더 높은 가중치를 받고, 이웃이 많은 node 1은 상대적으로 낮은 가중치를 받습니다.
+반면 오른쪽 그림에서는 alternative normalization를 사용한 경우로, 이웃이 적은 node 5는 더 높은 가중치를 받고, 이웃이 많은 node 1은 상대적으로 낮은 가중치를 받는다.
 
 이러한 정규화 방식의 선택은 모델의 성능과 표현력에 큰 영향을 미칠 수 있고, 특히 이웃 수가 비대칭적인 그래프에서는 alternative normalization가 더 효과적인 결과를 낼 수 있기 때문에 위처럼 사용된다.
 
