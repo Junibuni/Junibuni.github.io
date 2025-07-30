@@ -1,5 +1,5 @@
 ---
-title: Message Passing Neural Network
+title: Graph Convolutional Network
 date: 2025-07-29 11:20:00 +0900
 categories: [AI, Graph]
 tags: [pytorch, mpnn, graph, graph convolution, convolution, matrix operations, deep learning]
