@@ -216,7 +216,7 @@ A =
 ### Mean normalization
 
 \\[
-D^{-1} A \approx
+\hat{D}^{-1} \hat{A} \approx
 \begin{bmatrix}
   0.50 & 0.50 & 0.00\cr
   0.33 & 0.33 & 0.33\cr
@@ -230,7 +230,6 @@ D^{-1} A \approx
 \tilde{A} = \hat{D}^{-1/2} \hat{A} \hat{D}^{-1/2}
 \\]
 
-직접 계산하면:
 
 \\[
 \tilde{A} \approx
